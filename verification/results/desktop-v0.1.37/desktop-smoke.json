@@ -1,0 +1,113 @@
+{
+  "passed": true,
+  "version": "0.1.37\u002Bdb478622aa3a65a6db4536eb63cfa881b70f57a4",
+  "platform": "Microsoft Windows 10.0.26100",
+  "formControls": 38,
+  "pocketFirst": {
+    "Engine": "pocket",
+    "Threads": 2,
+    "Reference": "D:\\a\\_temp\\memoirs-models\\reference.wav",
+    "ReferenceTranscript": "",
+    "Text": "The small boat crossed the quiet lake.",
+    "ReusedModel": false,
+    "ReusedReference": false,
+    "LoadSeconds": 0.8975928,
+    "SynthesisSeconds": 0.7868704,
+    "DurationSeconds": 2,
+    "ChunkSeconds": [
+      0.7868704
+    ]
+  },
+  "pocketSecond": {
+    "Engine": "pocket",
+    "Threads": 2,
+    "Reference": "D:\\a\\_temp\\memoirs-models\\reference.wav",
+    "ReferenceTranscript": "",
+    "Text": "The small boat crossed the quiet lake.",
+    "ReusedModel": true,
+    "ReusedReference": true,
+    "LoadSeconds": 9E-07,
+    "SynthesisSeconds": 0.778939,
+    "DurationSeconds": 2.32,
+    "ChunkSeconds": [
+      0.778939
+    ]
+  },
+  "pocketLong": {
+    "Engine": "pocket",
+    "Threads": 2,
+    "Reference": "D:\\a\\_temp\\memoirs-models\\reference.wav",
+    "ReferenceTranscript": "",
+    "Text": "The small boat crossed the quiet lake. On the far shore, a little house stood among the trees. Its windows shone in the evening light. We followed the narrow path and listened to the birds as the sun began to set.",
+    "ReusedModel": true,
+    "ReusedReference": true,
+    "LoadSeconds": 6E-07,
+    "SynthesisSeconds": 4.1680901,
+    "DurationSeconds": 12.826,
+    "ChunkSeconds": [
+      4.1680901
+    ]
+  },
+  "pocketRestart": {
+    "Engine": "pocket",
+    "Threads": 2,
+    "Reference": "D:\\a\\_temp\\memoirs-models\\reference.wav",
+    "ReferenceTranscript": "",
+    "Text": "The small boat crossed the quiet lake.",
+    "ReusedModel": false,
+    "ReusedReference": false,
+    "LoadSeconds": 0.8609353,
+    "SynthesisSeconds": 0.8222688,
+    "DurationSeconds": 2.16,
+    "ChunkSeconds": [
+      0.8222688
+    ]
+  },
+  "cancellationObserved": true,
+  "first": {
+    "Engine": "chatterbox",
+    "Threads": 4,
+    "Reference": "D:\\a\\_temp\\memoirs-models\\reference.wav",
+    "ReferenceTranscript": "",
+    "Text": "The small boat crossed the quiet lake.",
+    "ReusedModel": false,
+    "ReusedReference": false,
+    "LoadSeconds": 76.8600197,
+    "SynthesisSeconds": 15.1151933,
+    "DurationSeconds": 2.44,
+    "ChunkSeconds": [
+      15.1076783
+    ]
+  },
+  "second": {
+    "Engine": "chatterbox",
+    "Threads": 4,
+    "Reference": "D:\\a\\_temp\\memoirs-models\\reference.wav",
+    "ReferenceTranscript": "",
+    "Text": "The small boat crossed the quiet lake.",
+    "ReusedModel": true,
+    "ReusedReference": true,
+    "LoadSeconds": 0.0001671,
+    "SynthesisSeconds": 13.8983323,
+    "DurationSeconds": 2.44,
+    "ChunkSeconds": [
+      13.89805
+    ]
+  },
+  "f5": {
+    "Engine": "f5",
+    "Threads": 4,
+    "Reference": "D:\\a\\_temp\\memoirs-models\\reference.wav",
+    "ReferenceTranscript": "Some call me nature. Others call me Mother Nature.",
+    "Text": "The small boat crossed the quiet lake.",
+    "ReusedModel": false,
+    "ReusedReference": false,
+    "LoadSeconds": 2.1333242,
+    "SynthesisSeconds": 159.8897899,
+    "DurationSeconds": 4.042666666666666,
+    "ChunkSeconds": [
+      159.8893111
+    ]
+  },
+  "scope": "Actual form load, voice selection, generation through desktop handlers, warm model/reference reuse, PocketTTS long narration/cancellation/restart, explicit script copy, saved transcript reload, finalized WAV decoding. No ASR or listening assessment."
+}
