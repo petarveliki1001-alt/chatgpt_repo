@@ -1,0 +1,66 @@
+name: Native speech verification on Windows
+on:
+  workflow_dispatch:
+  push:
+    branches: [native-runtime-verification]
+    paths:
+      - 'verification/NativeProbe/**'
+      - 'verification/models.json'
+      - '.github/workflows/native-voice-verification.yml'
+permissions:
+  contents: write
+jobs:
+  verify-windows:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Build native C# probe
+        run: dotnet build verification/NativeProbe -c Release
+      - name: Download pinned models and verify SHA-256
+        shell: pwsh
+        run: |
+          $models = Join-Path $env:RUNNER_TEMP 'native-models'
+          dotnet verification/NativeProbe/bin/Release/net8.0/NativeProbe.dll download verification/models.json $models
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Expand-Archive -Path "$models/f5/CPU_F32.zip" -DestinationPath "$models/f5"
+      - name: Generate speech without Python
+        shell: pwsh
+        run: |
+          $models = Join-Path $env:RUNNER_TEMP 'native-models'
+          $results = 'verification/results/windows'
+          New-Item -ItemType Directory -Force $results | Out-Null
+          "OS: $([System.Runtime.InteropServices.RuntimeInformation]::OSDescription)" | Set-Content "$results/platform.txt"
+          "CPU: $env:NUMBER_OF_PROCESSORS" | Add-Content "$results/platform.txt"
+          dotnet verification/NativeProbe/bin/Release/net8.0/NativeProbe.dll chatterbox "$models/chatterbox" "$models/fixtures/reference-en.wav" 'The small boat crossed the quiet lake.' "$results/chatterbox.wav" | Tee-Object "$results/chatterbox.log"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet verification/NativeProbe/bin/Release/net8.0/NativeProbe.dll f5-auto "$models/f5" "$models/fixtures/f5-vocab.txt" "$models/whisper/ggml-large-v3-turbo.bin" "$models/fixtures/reference-en.wav" 'The small boat crossed the quiet lake.' "$results/f5.wav" | Tee-Object "$results/f5.log"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet verification/NativeProbe/bin/Release/net8.0/NativeProbe.dll verify-text "$models/whisper/ggml-large-v3-turbo.bin" 'The small boat crossed the quiet lake.' "$results/chatterbox.wav" "$results/f5.wav" | Tee-Object "$results/transcriptions.log"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          'PASS: both native C# pipelines generated WAVs matching the expected narration under ASR.' | Set-Content "$results/outcome.txt"
+      - name: Preserve results and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-windows-verification
+          path: verification/results/windows/
+      - name: Save reviewable results to verification branch
+        if: always()
+        shell: pwsh
+        run: |
+          if (Test-Path 'verification/results/windows') {
+            Get-ChildItem verification/results/windows -Include '*.input.*' -Recurse | Remove-Item
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add verification/results/windows
+            git diff --cached --quiet
+            if ($LASTEXITCODE -eq 1) {
+              git commit -m 'Record native Windows speech verification results'
+              git push origin HEAD:native-runtime-verification
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
+          }

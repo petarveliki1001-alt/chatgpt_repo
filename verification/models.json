@@ -52,5 +52,29 @@
     "Url": "https://huggingface.co/onnx-community/chatterbox-ONNX/resolve/3cab09af388d3f02bba43443fce88c1f4525ac43/onnx/speech_encoder.onnx_data?download=true",
     "Size": 591274880,
     "Sha256": "04431dcef6325c54b02de2219845888b464bcd1f1ac2f8839c2fecd1ed2ef294"
+  },
+  {
+    "Path": "whisper/ggml-large-v3-turbo.bin",
+    "Url": "https://huggingface.co/ggerganov/whisper.cpp/resolve/5359861c739e955e79d9a303bcbc70fb988958b1/ggml-large-v3-turbo.bin?download=true",
+    "Size": 1624555275,
+    "Sha256": "1fc70f774d38eb169993ac391eea357ef47c88757ef72ee5943879b7e8e2bc69"
+  },
+  {
+    "Path": "fixtures/reference-en.wav",
+    "Url": "https://raw.githubusercontent.com/SWivid/F5-TTS/main/src/f5_tts/infer/examples/basic/basic_ref_en.wav",
+    "Size": 256018,
+    "Sha256": "b0e22048e72414fcc1e6b6342e47a774d748a195ed34e4a5b3fcf416707f2b71"
+  },
+  {
+    "Path": "fixtures/f5-vocab.txt",
+    "Url": "https://raw.githubusercontent.com/SWivid/F5-TTS/main/src/f5_tts/infer/examples/vocab.txt",
+    "Size": 11255,
+    "Sha256": "4e173934be56219eb38759fa8d4c48132d5a34454f0c44abce409bcf6a07ec46"
+  },
+  {
+    "Path": "chatterbox/tokenizer.json",
+    "Url": "https://huggingface.co/onnx-community/chatterbox-ONNX/resolve/3cab09af388d3f02bba43443fce88c1f4525ac43/tokenizer.json",
+    "Size": 28543,
+    "Sha256": "ecddf6aaae85e271610a2743409f7e447886957d0b0836687c1eaec5ccac2891"
   }
 ]

@@ -5,6 +5,37 @@ using System.Text.Json;
 Console.WriteLine($"Native ONNX Runtime: {OrtEnv.Instance().GetVersionString()}");
 Console.WriteLine($"Providers: {string.Join(", ", OrtEnv.Instance().GetAvailableProviders())}");
 if (args.Length == 0) return;
+if (args[0] == "f5")
+{
+    F5Probe.Generate(args[1], args[2], args[3], args[4], args[5], args[6]);
+    return;
+}
+if (args[0] == "f5-auto")
+{
+    string transcript = await NativeTranscriber.Transcribe(args[3], args[4]);
+    F5Probe.Generate(args[1], args[2], args[4], transcript, args[5], args[6]);
+    return;
+}
+if (args[0] == "chatterbox")
+{
+    ChatterboxProbe.Generate(args[1], args[2], args[3], args[4], args.Length > 5 ? int.Parse(args[5]) : 256);
+    return;
+}
+if (args[0] == "transcribe")
+{
+    await NativeTranscriber.Transcribe(args[1], args[2]);
+    return;
+}
+if (args[0] == "verify-text")
+{
+    await NativeTranscriber.TranscribeMany(args[1], args.Skip(3).ToArray(), args[2]);
+    return;
+}
+if (args[0] == "tokenize")
+{
+    Console.WriteLine(string.Join(',', new BpeTokenizer(args[1]).Encode(args[2])));
+    return;
+}
 if (args[0] == "download")
 {
     if (args.Length != 3) throw new ArgumentException("download <manifest.json> <model-directory>");
