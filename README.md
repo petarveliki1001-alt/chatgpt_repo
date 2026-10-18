@@ -1,4 +1,4 @@
-# Personal Memoirs Reader v0.1.33 — F5 repair candidate
+# Personal Memoirs Reader v0.1.34 — F5 repair candidate
 
 Windows .NET 8 desktop application for voice recording and memoir reading with Windows SAPI, F5-TTS, or an existing local Chatterbox installation.
 
@@ -16,7 +16,11 @@ Transcription decodes WAV audio through SoundFile and sends a mono 16 kHz array 
 
 ## Run on Windows
 
-Extract the entire `PersonalMemoirsReader_v0.1.33_app-only.zip` and run `PersonalMemoirsReader.exe`. Keep the Python workers beside it. Microsoft .NET 8 Desktop Runtime x64 must be installed separately. Python packages and model weights are also separate.
+Extract the entire `PersonalMemoirsReader_v0.1.34_app-only.zip` and run `PersonalMemoirsReader.exe`. Keep the Python workers beside it. Microsoft .NET 8 Desktop Runtime x64 must be installed separately. Python packages and model weights are also separate.
+
+Every delivered ZIP has its version in the top-level folder, for example `PersonalMemoirsReader_v0.1.34_app-only/`. Extract that folder intact to keep earlier program versions separate. Voice data and Python/model caches remain shared between versions.
+
+The supplied failure log confirms cached F5 speech weights loaded successfully, but the Whisper configuration was absent and generation was offline. Generation now checks whether the readiness marker certifies automatic transcription before loading the speech model. Legacy speech-only installations are routed through the confirmed setup/download flow first. Setup explicitly enables model network access in its child process; generation explicitly disables it. Existing Python environments no longer require rediscovering a base interpreter just to acquire models.
 
 Existing F5 environments and caches under `%LOCALAPPDATA%\PersonalMemoirsReader` are reused. If needed, use **Install / Verify F5** with internet access. The existing installer looks for Python 3.11 at `C:\Program Files\Python311\python.exe` or the base interpreter of a detected Chatterbox environment. Python installed elsewhere is not yet selectable in the UI. Generation uses local models with offline flags. Recordings and narrations stay in `Documents\Personal Memoirs Reader`.
 
@@ -37,6 +41,8 @@ Reference tests on Windows or Linux (Python 3.11+):
 python -m pip install -r requirements-test.txt
 python -m unittest discover -s tests -v
 ```
+
+After publishing to `artifacts/app-only-v0.1.34`, run `python tools/package_release.py`. The script reads the project version, verifies worker freshness and versioned ZIP roots, and refuses to overwrite an already packaged release. Increment `<Version>` in the project for each new iteration; the window title uses that same value.
 
 ## Validation and remaining work
 

@@ -17,21 +17,29 @@ public partial class MainForm
         psi.Environment["PYTHONUTF8"] = "1";
         psi.Environment["HF_HOME"] = F5Cache;
         psi.Environment["HF_HUB_DISABLE_TELEMETRY"] = "1";
-        if (offline)
+        psi.Environment["HF_HUB_OFFLINE"] = offline ? "1" : "0";
+        psi.Environment["TRANSFORMERS_OFFLINE"] = offline ? "1" : "0";
+    }
+    private bool F5AutomaticReferenceReady
+    {
+        get
         {
-            psi.Environment["HF_HUB_OFFLINE"] = "1";
-            psi.Environment["TRANSFORMERS_OFFLINE"] = "1";
+            try { return File.ReadAllText(F5ReadyMarker).Contains("automatic reference transcription", StringComparison.OrdinalIgnoreCase); }
+            catch (IOException) { return false; }
+            catch (UnauthorizedAccessException) { return false; }
         }
     }
-    private async void buttonF5Setup_Click(object? sender, EventArgs e)
+    private async void buttonF5Setup_Click(object? sender, EventArgs e) => await SetupF5Async();
+
+    private async Task<bool> SetupF5Async()
     {
-        if (generating) return;
+        if (generating) return false;
         if (MessageBox.Show(this,
-            "F5-TTS requires its own Python packages and pretrained model weights.\n\n" +
+            "Automatic reference transcription needs its own Whisper model, in addition to F5 speech weights.\n\n" +
             "The application will create a SEPARATE environment, install F5-TTS, download its speech and automatic-transcription models, and test loading them offline.\n" +
-            "This may take considerable time and disk space; internet is required for setup only.\n" +
+            "Whisper is a substantial additional download. Internet is required for setup only; generation remains offline.\n" +
             "Your existing Chatterbox installation will not be modified.\n\nContinue?",
-            "F5-TTS installation and verification", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+            "F5-TTS installation and verification", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return false;
         SetAiBusy(true);
         buttonCancelChatterbox.Enabled = true;
         var outputDir = Path.Combine(dataRoot, "Narrations"); Directory.CreateDirectory(outputDir);
@@ -47,18 +55,6 @@ public partial class MainForm
         chatterboxStarted = DateTime.Now; chatterboxPhase = "Preparing F5 installation"; chatterboxTimer.Start();
         try
         {
-            var systemPython = @"C:\Program Files\Python311\python.exe";
-            if (!File.Exists(systemPython))
-            {
-                var chatterbox = FindChatterboxPython();
-                if (chatterbox == null) throw new FileNotFoundException("Python 3.11 installation was not found.");
-                // A venv has Scripts/python.exe; its pyvenv.cfg records the base interpreter.
-                var config = Path.Combine(Directory.GetParent(Directory.GetParent(chatterbox)!.FullName)!.FullName, "pyvenv.cfg");
-                if (!File.Exists(config)) throw new FileNotFoundException("Cannot locate Python environment configuration: " + config);
-                var home = File.ReadLines(config).FirstOrDefault(x => x.TrimStart().StartsWith("home =", StringComparison.OrdinalIgnoreCase))?.Split('=', 2)[1].Trim();
-                systemPython = Path.Combine(home ?? "", "python.exe");
-                if (!File.Exists(systemPython)) throw new FileNotFoundException("Base Python executable not found: " + systemPython);
-            }
             async Task Run(string stage, string exe, bool offline, params string[] args)
             {
                 Log("STAGE: " + stage);
@@ -77,7 +73,22 @@ public partial class MainForm
                 if (process.ExitCode != 0) throw new InvalidOperationException(stage + " failed (exit " + process.ExitCode + "). See AI Log.");
                 chatterboxProcess = null;
             }
-            if (!File.Exists(F5Python)) await Run("Creating separate Python environment", systemPython, false, "-m", "venv", F5Environment);
+            if (!File.Exists(F5Python))
+            {
+            var systemPython = @"C:\Program Files\Python311\python.exe";
+            if (!File.Exists(systemPython))
+            {
+                var chatterbox = FindChatterboxPython();
+                if (chatterbox == null) throw new FileNotFoundException("Python 3.11 installation was not found.");
+                // A venv has Scripts/python.exe; its pyvenv.cfg records the base interpreter.
+                var config = Path.Combine(Directory.GetParent(Directory.GetParent(chatterbox)!.FullName)!.FullName, "pyvenv.cfg");
+                if (!File.Exists(config)) throw new FileNotFoundException("Cannot locate Python environment configuration: " + config);
+                var home = File.ReadLines(config).FirstOrDefault(x => x.TrimStart().StartsWith("home =", StringComparison.OrdinalIgnoreCase))?.Split('=', 2)[1].Trim();
+                systemPython = Path.Combine(home ?? "", "python.exe");
+                if (!File.Exists(systemPython)) throw new FileNotFoundException("Base Python executable not found: " + systemPython);
+            }
+                await Run("Creating separate Python environment", systemPython, false, "-m", "venv", F5Environment);
+            }
             await Run("Installing F5-TTS dependencies", F5Python, false, "-m", "pip", "install", "f5-tts");
             var setupWorker = Path.Combine(AppContext.BaseDirectory, "f5_setup_worker.py");
             if (!File.Exists(setupWorker)) throw new FileNotFoundException("Setup worker is missing", setupWorker);
@@ -87,6 +98,7 @@ public partial class MainForm
             Log("READY: F5-TTS installation and offline model verification succeeded.");
             labelStatus.Text = "F5-TTS ready: pretrained model verified offline.";
             MessageBox.Show(this, "F5-TTS is ready for offline generation. Choose a recording and enter narration text. Leave the reference transcript blank for automatic transcription.", "F5-TTS ready");
+            return true;
         }
         catch (Exception ex)
         {
@@ -94,6 +106,7 @@ public partial class MainForm
             Log("FAILURE: " + ex);
             labelStatus.Text = "F5-TTS not ready. Open AI Log for installation details.";
             MessageBox.Show(this, ex.Message, "F5-TTS setup failed");
+            return false;
         }
         finally
         {
@@ -109,6 +122,12 @@ public partial class MainForm
         if (!File.Exists(F5Python) || !File.Exists(F5ReadyMarker)) { MessageBox.Show(this, "F5-TTS is not ready. Click Install / Verify F5 to install its model and check offline operation."); return; }
         if (selectedFile == null || !File.Exists(selectedFile)) { MessageBox.Show(this, "Select a voice reference recording."); return; }
         if (string.IsNullOrWhiteSpace(textMemoir.Text)) { MessageBox.Show(this, "Enter narration text."); return; }
+        if (string.IsNullOrWhiteSpace(textReference.Text) && !F5AutomaticReferenceReady)
+        {
+            // Legacy speech-only readiness does not prove Whisper is installed.
+            // Finish the confirmed download/verification before loading F5 for generation.
+            if (!await SetupF5Async()) return;
+        }
         // Identical reference and target words are valid for controlled voice tests.
         // Do not block synthesis based on transcript overlap.
         var speed = numericF5Speed.Value;

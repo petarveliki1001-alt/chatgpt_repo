@@ -78,7 +78,7 @@ namespace PersonalMemoirsReader
             Controls.Add(buttonOpenText); Controls.Add(buttonSaveText); Controls.Add(labelStatus); Controls.Add(buttonGenerate);
             Controls.Add(labelFfmpeg); Controls.Add(textFfmpeg); Controls.Add(buttonFfmpeg);
             Controls.Add(labelEngine); Controls.Add(comboVoices); Controls.Add(buttonStopSpeech);
-            Name = "MainForm"; StartPosition = FormStartPosition.CenterScreen; Text = "Personal Memoirs Reader v0.1.33";
+            Name = "MainForm"; StartPosition = FormStartPosition.CenterScreen; Text = $"Personal Memoirs Reader v{Application.ProductVersion.Split('+')[0]}";
             ResumeLayout(false); PerformLayout();
         }
         #endregion
