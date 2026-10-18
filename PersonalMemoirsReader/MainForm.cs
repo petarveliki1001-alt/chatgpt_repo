@@ -5,12 +5,12 @@ using System.Text;
 namespace PersonalMemoirsReader;
 public partial class MainForm : Form
 {
-    private readonly string dataRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Personal Memoirs Reader");
+    private readonly string dataRoot = Environment.GetEnvironmentVariable("MEMOIRS_DATA_ROOT") ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Personal Memoirs Reader");
     private WaveRecorder? recorder;
     private string? pendingRecording;
     private string? selectedFile;
     private bool generating;
-    private Process? chatterboxProcess;
+
     private SoundPlayer? generatedPlayer;
     private string? latestChatterboxLog;
     private readonly System.Windows.Forms.Timer chatterboxTimer = new() { Interval = 1000 };
@@ -28,7 +28,8 @@ public partial class MainForm : Form
         base.OnLoad(e);
         if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime || DesignMode)
             return;
-        Text = $"Personal Memoirs Reader v{Application.ProductVersion.Split('+')[0]}";
+        Text = $"Memoirs Reader v{Application.ProductVersion.Split('+')[0]}";
+        InitializeNative();
         RefreshSamples();
         InitializeSpeech();
         chatterboxTimer.Tick += (_, _) =>
@@ -64,11 +65,7 @@ public partial class MainForm : Form
         StopSamplePlayback();
         string? previousSelection = selectedFile;
         selectedFile = listSamples.SelectedItem as string;
-        if (previousSelection != selectedFile && referenceStart != null)
-        {
-            referenceStart.Value = referenceEnd.Value = 0;
-            textReference.Clear();
-        }
+        if (previousSelection != selectedFile) LoadSavedTranscript();
         labelSelected.Text = selectedFile == null ? "Selected: none" : "Selected: " + Path.GetFileName(selectedFile);
         buttonListen.Enabled = selectedFile != null;
         buttonStopListen.Enabled = false;
@@ -189,7 +186,7 @@ public partial class MainForm : Form
                 comboVoices.Items.Add((string)token.GetDescription());
             }
             if (comboVoices.Items.Count > 0) comboVoices.SelectedIndex = 0;
-            labelStatus.Text = count > 0 ? "Windows offline speech ready. This is not voice cloning." : "No Windows desktop SAPI voices installed.";
+            labelStatus.Text = "Choose a sample and enter narration. Chatterbox needs no transcript. CPU generation may take longer than playback.";
             buttonGenerate.Enabled = count > 0;
         }
         catch (Exception ex)
@@ -218,88 +215,6 @@ public partial class MainForm : Form
     {
         try { if (speech != null) speech.Speak("", 3); } catch { }
         labelStatus.Text = "Reading stopped.";
-    }
-    private async void buttonChatterbox_Click(object? sender, EventArgs e)
-    {
-        if (generating) return;
-        if (string.IsNullOrWhiteSpace(textMemoir.Text)) { MessageBox.Show(this, "Enter memoir text first."); return; }
-        string? python = FindChatterboxPython();
-        if (python == null) { MessageBox.Show(this, "Chatterbox Python installation was not found.", "Local engine missing"); return; }
-        string model = Path.Combine(Directory.GetParent(Directory.GetParent(Directory.GetParent(python)!.FullName)!.FullName)!.FullName, "Models", "English");
-        if (!Directory.Exists(model)) { MessageBox.Show(this, "Local model directory not found: " + model); return; }
-        string worker = Path.Combine(AppContext.BaseDirectory, "chatterbox_worker.py");
-        if (!File.Exists(worker)) { MessageBox.Show(this, "Bundled speech worker is missing: " + worker); return; }
-        string outputDir = Path.Combine(dataRoot, "Narrations");
-        Directory.CreateDirectory(outputDir);
-        string output = Path.Combine(outputDir, "narration_" + DateTime.Now.ToString("yyyyMMdd_HHmmssfff") + ".wav");
-        string textPath = Path.Combine(Path.GetTempPath(), "pmr_" + Guid.NewGuid().ToString("N") + ".txt");
-        latestChatterboxLog = Path.Combine(outputDir, "Chatterbox_LastRun.log");
-        File.WriteAllText(textPath, textMemoir.Text, Encoding.UTF8);
-        SetAiBusy(true);
-        chatterboxStarted = DateTime.Now; chatterboxPhase = "starting Python engine";
-        chatterboxTimer.Start();
-        labelStatus.Text = "Chatterbox: starting local engine...";
-        var logLines = new System.Collections.Concurrent.ConcurrentQueue<string>();
-        void AddLog(string message)
-        {
-            logLines.Enqueue($"[{DateTime.Now:HH:mm:ss}] {message}");
-            if (IsHandleCreated && !IsDisposed) BeginInvoke((Action)(() => {
-                chatterboxPhase = message.Length > 85 ? message[..85] : message;
-            }));
-        }
-        try
-        {
-            AddLog("Python: " + python);
-            AddLog("Model: " + model);
-            AddLog("Worker: " + worker);
-            AddLog("Output: " + output);
-            AddLog("Fresh Chatterbox generation: uses temporary sections, never reads MemoirCheckpoints.");
-            var psi = new ProcessStartInfo(python) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-            psi.ArgumentList.Add("-u"); psi.ArgumentList.Add(worker);
-            psi.ArgumentList.Add("--model"); psi.ArgumentList.Add(model);
-            psi.ArgumentList.Add("--text-file"); psi.ArgumentList.Add(textPath);
-            psi.ArgumentList.Add("--output"); psi.ArgumentList.Add(output);
-            // Original, successful Chatterbox baseline. Experimental presets removed.
-            var voiceStyle = (0.5, 0.5);
-            psi.ArgumentList.Add("--exaggeration"); psi.ArgumentList.Add("0.5");
-            psi.ArgumentList.Add("--cfg-weight"); psi.ArgumentList.Add("0.5");
-            AddLog("Chatterbox original baseline: exaggeration=0.5, cfg_weight=0.5");
-            if (selectedFile != null && File.Exists(selectedFile)) { psi.ArgumentList.Add("--reference"); psi.ArgumentList.Add(selectedFile); AddLog("Reference: " + selectedFile); }
-            psi.Environment["HF_HUB_OFFLINE"] = "1"; psi.Environment["TRANSFORMERS_OFFLINE"] = "1";
-            var proc = new Process { StartInfo = psi, EnableRaisingEvents = true };
-            chatterboxProcess = proc;
-            proc.OutputDataReceived += (_, args) => { if (args.Data != null) AddLog(args.Data); };
-            proc.ErrorDataReceived += (_, args) => { if (args.Data != null) AddLog(args.Data.Contains("Sampling:") ? "PROGRESS: " + args.Data : args.Data.Contains("Warning:") ? "WARNING: " + args.Data : "STDERR: " + args.Data); };
-            if (!proc.Start()) throw new InvalidOperationException("Could not start the Chatterbox process.");
-            AddLog("Engine process started (PID " + proc.Id + ")");
-            proc.BeginOutputReadLine(); proc.BeginErrorReadLine();
-            await proc.WaitForExitAsync();
-            proc.WaitForExit(); // ensure asynchronous output handlers have drained
-            AddLog("Engine exited with code " + proc.ExitCode);
-            if (proc.ExitCode != 0) throw new InvalidOperationException("Chatterbox exited with code " + proc.ExitCode + ". Open AI Log for details.");
-            if (!File.Exists(output)) throw new InvalidOperationException("No WAV was generated. Open AI Log for details.");
-            generatedPlayer?.Stop(); generatedPlayer?.Dispose();
-            generatedPlayer = new SoundPlayer(output); generatedPlayer.Load(); generatedPlayer.Play();
-            var metadata = output + ".txt";
-            File.WriteAllText(metadata, $"Style: Chatterbox original baseline\nExaggeration: {voiceStyle.Item1.ToString(System.Globalization.CultureInfo.InvariantCulture)}\nCFG weight: {voiceStyle.Item2.ToString(System.Globalization.CultureInfo.InvariantCulture)}\nReference: {selectedFile ?? "Default"}\nText: {textMemoir.Text}\n", Encoding.UTF8);
-            labelStatus.Text = "Chatterbox WAV saved and playing: " + output;
-            buttonCancelChatterbox.Enabled = true;
-        }
-        catch (Exception ex)
-        {
-            AddLog("FAILURE: " + ex);
-            labelStatus.Text = "Chatterbox failed. Click AI Log to see why.";
-            MessageBox.Show(this, ex.Message, "Local speech generation");
-        }
-        finally
-        {
-            chatterboxTimer.Stop();
-            try { File.WriteAllLines(latestChatterboxLog!, logLines.ToArray()); } catch { }
-            chatterboxProcess?.Dispose(); chatterboxProcess = null;
-            SetAiBusy(false);
-            buttonCancelChatterbox.Enabled = generatedPlayer != null;
-            try { File.Delete(textPath); } catch { }
-        }
     }
     private void buttonHistory_Click(object? sender, EventArgs e)
     {
@@ -352,41 +267,30 @@ public partial class MainForm : Form
     {
         if (latestChatterboxLog == null || !File.Exists(latestChatterboxLog))
         { MessageBox.Show(this, "No completed AI run log yet."); return; }
-        using var dialog = new Form { Text = "Chatterbox AI Log", Width = 850, Height = 540, StartPosition = FormStartPosition.CenterParent };
+        using var dialog = new Form { Text = "Speech Log", Width = 850, Height = 540, StartPosition = FormStartPosition.CenterParent };
         var text = new TextBox { Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Both, WordWrap = false, Dock = DockStyle.Fill, Font = new Font("Consolas", 9), Text = File.ReadAllText(latestChatterboxLog) };
         dialog.Controls.Add(text);
         dialog.ShowDialog(this);
     }
-    private static string? FindChatterboxPython()
-    {
-        var folders = new List<string>();
-        string? current = AppContext.BaseDirectory;
-        for (int i = 0; i < 7 && current != null; i++, current = Directory.GetParent(current)?.FullName) folders.Add(current);
-        string documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        folders.Add(Path.Combine(documents, "Visual Studio 2026", "VS Projects", "Personal Memoirs Reader"));
-        foreach (string folder in folders)
-        {
-            foreach (string candidate in new[] { Path.Combine(folder, "chatterbox", ".venv", "Scripts", "python.exe"), Path.Combine(folder, ".venv", "Scripts", "python.exe") })
-                if (File.Exists(candidate)) return candidate;
-        }
-        return null;
-    }
     private void buttonCancelChatterbox_Click(object? sender, EventArgs e)
     {
-        try { if (chatterboxProcess is { HasExited: false }) chatterboxProcess.Kill(entireProcessTree: true); } catch { }
-        generatedPlayer?.Stop();
-        generatedPlayer?.Dispose(); generatedPlayer = null;
-        if (generating) labelStatus.Text = "AI engine stopping...";
-        else { buttonCancelChatterbox.Enabled = false; labelStatus.Text = "Chatterbox stopped."; }
+        generationCancellation?.Cancel();
+        generatedPlayer?.Stop(); generatedPlayer?.Dispose(); generatedPlayer = null;
+        labelStatus.Text = generating ? "Stopping after the active model operation..." : "Playback stopped.";
     }
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
-        buttonCancelChatterbox_Click(null, EventArgs.Empty);
-        generatedPlayer?.Dispose();
-        StopSamplePlayback();
-        try { if (referencePreviewPath != null) File.Delete(referencePreviewPath); } catch { }
-        buttonStopSpeech_Click(null, EventArgs.Empty);
-        if (speech != null) { try { System.Runtime.InteropServices.Marshal.FinalReleaseComObject(speech); } catch { } speech = null; }
+        if (generating)
+        {
+            e.Cancel = true; closeAfterJob = true; generationCancellation?.Cancel();
+            labelStatus.Text = "Finishing the active model operation before closing...";
+            return;
+        }
+        chatterboxTimer.Stop(); chatterboxTimer.Dispose();
+        narrator?.Dispose();
+        generatedPlayer?.Stop(); generatedPlayer?.Dispose(); StopSamplePlayback();
+        try { if (speech != null) { speech.Speak("",3); System.Runtime.InteropServices.Marshal.FinalReleaseComObject(speech); } } catch { }
+        speech=null;
         try { recorder?.Stop(); recorder?.Dispose(); } catch { }
         base.OnFormClosing(e);
     }

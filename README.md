@@ -1,51 +1,40 @@
-# Personal Memoirs Reader v0.1.34 — F5 repair candidate
+# Memoirs Reader v0.1.36
 
-Windows .NET 8 desktop application for voice recording and memoir reading with Windows SAPI, F5-TTS, or an existing local Chatterbox installation.
+Windows x64 desktop app. Select a voice recording, enter narration text, and generate speech in the sample voice. The editable WinForms project and executable are delivered together in `MemoirsReader_v0.1.36.zip`, under the folder `MemoirsReader_v0.1.36/`.
 
-## Reference handling
+## Open or run
 
-The application no longer imposes an 11-second (or one-second minimum) reference duration restriction. Full recordings are accepted and passed to F5 by default, with their supplied transcript. Start/end controls remain optional: leave both at zero to use the whole recording. The application does not guess where sentences end or silently substitute the first two transcript sentences.
+- **Run:** open `MemoirsReader.exe`. Requires Microsoft .NET 8 Desktop Runtime x64. A dedicated GPU and Python are not required.
+- **Edit:** open `MemoirsReader.sln` in Visual Studio 2022 17.8+ with the .NET desktop development workload. Right-click `MainForm.cs` → **View Designer**. Press F5 to build/run. Source files remain separate from Designer layout.
+- **First speech use:** click **Set up Chatterbox**, then **Generate with Chatterbox**. Setup displays its native-model download size (about 3.27 GB) before downloading. Models are verified with pinned SHA-256 hashes. Generation subsequently runs offline. Models and environments from the old Python implementation are not used or changed.
 
-F5's own preprocessing is unchanged and may shorten long reference audio internally. Accepting the complete file at the application boundary does not bypass that library behavior or guarantee repetition-free output.
+## Engines and behavior
 
-The reference transcript is optional. Leave it blank to let F5 transcribe its own processed reference audio, after any internal trimming, so transcription describes the audio F5 actually uses. Entering text remains a manual override. Narration text is still required.
+**Chatterbox** is the direct sample-plus-text path: no reference transcript is needed. English ONNX FP32 models run through C# and native ONNX Runtime. Longer text is split at sentence/word boundaries, with every section generated in order and a short pause between sections. A missing stop token fails the job rather than silently accepting truncated audio. The native decoder uses greedy generation and fixed exaggeration 0.5; full parity with the previous Python sampling controls is not claimed.
 
-For an existing installation, run **Install / Verify F5** once with internet access to acquire F5's automatic transcription model (`openai/whisper-large-v3-turbo`, a substantial additional download). Setup verifies speech and transcription model loading in a fresh process with offline flags. Subsequent generation stays offline. Existing speech-only readiness markers do not establish that the transcription model is cached. Missing transcription weights are reported with instructions to run setup or enter a manual transcript.
+**F5** is optional and remains CPU intensive. It requires the exact words spoken in the sample. Enter a known script/manual transcript once; it is saved under a hash of that sample's content and reloaded when that sample is selected again. There is no automatic transcription, Whisper dependency or download. F5 setup downloads the verified native model archive and English vocabulary (about 1.34 GB, plus extraction disk space). This native export uses 31 integration intervals from 32 time points. Speaking speed controls generated duration; the native text path currently supports English. Full recordings are used without an application duration cutoff or silent internal clipping. Large references/narrations can be expensive; a matching transcript must describe the entire selected file.
 
-Transcription decodes WAV audio through SoundFile and sends a mono 16 kHz array to the ASR pipeline; it does not require FFmpeg to decode the reference. Automatic transcription may be slow on CPU and can make recognition errors. Its result is recorded in AI Log. The worker uses 32 inference steps. Input validation still rejects empty or silent recordings, nonfinite samples, and invalid optional ranges. Competing AI actions and input edits are disabled during generation.
+The active engine stays loaded for the life of the app and caches the last sample's prepared conditioning. Switching engines releases the previous engine to limit memory use. CPU threads default to the available processor count capped at four, a conservative measured starting point rather than workstation-specific tuning. No GPU package is installed. No real-time CPU performance is promised: the earlier native F5 CPU test took about 88 seconds for 4 seconds of audio on the hosted test machine.
 
-## Run on Windows
+**Stop AI / Playback** requests cancellation between native model calls; the active call must finish first. Canceled generation does not publish an incomplete WAV. Closing while a job is active requests cancellation and waits for that call before releasing native resources. Setup downloads can also be canceled. The live Speech Log records failures and generation phases. Output JSON/text records model reuse, reference reuse, loading time, synthesis time, and output duration.
 
-Extract the entire `PersonalMemoirsReader_v0.1.34_app-only.zip` and run `PersonalMemoirsReader.exe`. Keep the Python workers beside it. Microsoft .NET 8 Desktop Runtime x64 must be installed separately. Python packages and model weights are also separate.
+Recording and WAV import, installed Windows voices, sample playback, and comparisons remain available. The Windows voice is ordinary system speech, not voice cloning. WAV references must be PCM16 or float32; other formats require a separately selected FFmpeg executable for conversion. Voice sample names are displayed without their directory prefixes.
 
-Every delivered ZIP has its version in the top-level folder, for example `PersonalMemoirsReader_v0.1.34_app-only/`. Extract that folder intact to keep earlier program versions separate. Voice data and Python/model caches remain shared between versions.
+## Data and previous versions
 
-The supplied failure log confirms cached F5 speech weights loaded successfully, but the Whisper configuration was absent and generation was offline. Generation now checks whether the readiness marker certifies automatic transcription before loading the speech model. Legacy speech-only installations are routed through the confirmed setup/download flow first. Setup explicitly enables model network access in its child process; generation explicitly disables it. Existing Python environments no longer require rediscovering a base interpreter just to acquire models.
+All program files live in the versioned extraction folder. Existing recordings/narrations in `Documents\Personal Memoirs Reader` are retained. Native models and saved F5 transcripts live in `%LOCALAPPDATA%\MemoirsReader`. The app does not uninstall Python or delete previous models. Each changed release gets a new version; archives are never overwritten with different contents under the same version.
 
-Existing F5 environments and caches under `%LOCALAPPDATA%\PersonalMemoirsReader` are reused. If needed, use **Install / Verify F5** with internet access. The existing installer looks for Python 3.11 at `C:\Program Files\Python311\python.exe` or the base interpreter of a detected Chatterbox environment. Python installed elsewhere is not yet selectable in the UI. Generation uses local models with offline flags. Recordings and narrations stay in `Documents\Personal Memoirs Reader`.
+For development/automation, `MEMOIRS_MODEL_ROOT` overrides the native model directory and `MEMOIRS_DATA_ROOT` overrides the recording/output directory. Keep reference samples and generated input metadata private unless deliberately sharing them.
 
-Reference audition needs only the F5 environment's NumPy and SoundFile packages and loads no neural models. Chatterbox requires its separate existing installation. FFmpeg is optional for non-WAV imports.
+## Build and verification
 
-## Build and test
-
-From the repository root with a .NET 8 SDK:
-
-```sh
-dotnet build PersonalMemoirsReader.sln -c Release -p:EnableWindowsTargeting=true
-dotnet publish PersonalMemoirsReader/PersonalMemoirsReader.csproj -c Release -r win-x64 --self-contained true -p:EnableWindowsTargeting=true -o artifacts/win-x64
+```
+dotnet build MemoirsReader.sln -c Release
+dotnet run --project NativeSpeech.Tests -c Release -- NativeSpeech/models.json
+dotnet publish PersonalMemoirsReader -c Release -r win-x64 --self-contained false -o artifacts/app
+pwsh tools/package-release.ps1
 ```
 
-Reference tests on Windows or Linux (Python 3.11+):
+Linux cross-builds require `-p:EnableWindowsTargeting=true`. No Python scripts are part of the current app or release workflow. Archived Python verification scripts and older ZIPs in the repository are historical and are not packaged.
 
-```sh
-python -m pip install -r requirements-test.txt
-python -m unittest discover -s tests -v
-```
-
-After publishing to `artifacts/app-only-v0.1.34`, run `python tools/package_release.py`. The script reads the project version, verifies worker freshness and versioned ZIP roots, and refuses to overwrite an already packaged release. Increment `<Version>` in the project for each new iteration; the window title uses that same value.
-
-## Validation and remaining work
-
-Linux cross-compilation and self-contained Windows packaging passed. Fifteen reference/setup tests passed: real WAV slicing, stereo conversion, transcript preservation, invalid inputs, model-free preview, and generation handoff with a simulated model. Tests do not validate neural speech quality.
-
-Windows GUI, microphone capture, actual pretrained speech/transcription model acquisition and inference, and listening comparisons have not been verified here. Pipeline tests use simulated model responses. This is a repair candidate; F5 quality and the broader UI are not yet finalized.
+`.github/workflows/desktop-release.yml` builds on Windows, runs the C# checks, downloads/verifies the two engines' models with no ASR, opens the actual form, generates through desktop handlers, verifies warm Chatterbox engine/reference reuse and F5 transcript persistence, validates WAV outputs, and packages only after these checks pass. Results distinguish pipeline verification from sound quality: neither automatic transcription nor a human listening assessment is performed. Interactive Visual Studio Designer behavior is prepared in source but is not exercised by that smoke test. Neural output can still mispronounce, repeat, or differ from a sample; this release does not claim universal voice-quality or performance parity.

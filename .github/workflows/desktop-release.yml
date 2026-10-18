@@ -1,0 +1,74 @@
+name: Windows desktop release
+on:
+  workflow_dispatch:
+  push:
+    branches: [native-runtime-verification]
+    paths:
+      - 'PersonalMemoirsReader/**'
+      - 'NativeSpeech/**'
+      - 'NativeSpeech.Tests/**'
+      - 'MemoirsReader.sln'
+      - 'tools/package-release.ps1'
+      - '.github/workflows/desktop-release.yml'
+permissions:
+  contents: write
+jobs:
+  desktop:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Build and check native application
+        shell: pwsh
+        run: |
+          dotnet build MemoirsReader.sln -c Release
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet run --project NativeSpeech.Tests -c Release -- NativeSpeech/models.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet publish PersonalMemoirsReader -c Release -r win-x64 --self-contained false -o artifacts/app
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/memoirs-models
+          key: native-desktop-models-${{ hashFiles('NativeSpeech/models.json') }}
+      - name: Verify speech models without Python or ASR
+        shell: pwsh
+        run: |
+          $models = Join-Path $env:RUNNER_TEMP 'memoirs-models'
+          dotnet run --project NativeSpeech.Tests -c Release -- install chatterbox $models NativeSpeech/models.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet run --project NativeSpeech.Tests -c Release -- install f5 $models NativeSpeech/models.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Invoke-WebRequest 'https://raw.githubusercontent.com/SWivid/F5-TTS/main/src/f5_tts/infer/examples/basic/basic_ref_en.wav' -OutFile "$models/reference.wav"
+          if ((Get-FileHash "$models/reference.wav" -Algorithm SHA256).Hash -ne 'b0e22048e72414fcc1e6b6342e47a774d748a195ed34e4a5b3fcf416707f2b71') { throw 'Reference fixture checksum mismatch.' }
+      - name: Exercise actual WinForms generation and reuse
+        shell: pwsh
+        run: |
+          $models = Join-Path $env:RUNNER_TEMP 'memoirs-models'
+          $results = Join-Path $env:GITHUB_WORKSPACE 'verification/results/desktop-v0.1.36'
+          $process = Start-Process -FilePath (Resolve-Path 'artifacts/app/MemoirsReader.exe') -ArgumentList @('--smoke',"`"$models`"","`"$models/reference.wav`"","`"$results`"") -Wait -PassThru
+          if ($process.ExitCode -ne 0) { if (Test-Path "$results/failure.txt") { Get-Content "$results/failure.txt" }; throw "Desktop smoke exit: $($process.ExitCode)" }
+          if (!(Test-Path "$results/desktop-smoke.json")) { throw 'Desktop test produced no results.' }
+          Get-Content "$results/desktop-smoke.json"
+      - name: Package tested executable and editable source together
+        shell: pwsh
+        run: tools/package-release.ps1
+      - name: Preserve diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MemoirsReader-v0.1.36-validation
+          path: verification/results/desktop-v0.1.36/
+      - name: Save tested delivery
+        shell: pwsh
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add downloads/MemoirsReader_v0.1.36.zip verification/results/desktop-v0.1.36/desktop-smoke.json
+          git commit -m 'Deliver tested Memoirs Reader v0.1.36 executable and editable source [skip ci]'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git push origin HEAD:native-runtime-verification
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

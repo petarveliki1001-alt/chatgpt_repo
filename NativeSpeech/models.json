@@ -1,0 +1,68 @@
+[
+  {
+    "Path": "f5/CPU_F32.zip",
+    "Url": "https://huggingface.co/H5N1AIDS/F5-TTS-ONNX/resolve/d3af73ed2db92509a45e3edd4bf43d281306b013/CPU_F32.zip?download=true",
+    "Size": 1336503730,
+    "Sha256": "09c3b2cf37fc51db6d42cafc5d257b457f389209decb8341dedba446d647f0d5"
+  },
+  {
+    "Path": "chatterbox/onnx/conditional_decoder.onnx",
+    "Url": "https://huggingface.co/onnx-community/chatterbox-ONNX/resolve/3cab09af388d3f02bba43443fce88c1f4525ac43/onnx/conditional_decoder.onnx?download=true",
+    "Size": 6350448,
+    "Sha256": "1656d0d31332bae1854839959a3139300ebb67c178651dfa3f8c5fbfa5351351"
+  },
+  {
+    "Path": "chatterbox/onnx/conditional_decoder.onnx_data",
+    "Url": "https://huggingface.co/onnx-community/chatterbox-ONNX/resolve/3cab09af388d3f02bba43443fce88c1f4525ac43/onnx/conditional_decoder.onnx_data?download=true",
+    "Size": 533970816,
+    "Sha256": "51d58345a272747665ec9d5bb61e01835258a940e321a288582ac4c18cf01b5a"
+  },
+  {
+    "Path": "chatterbox/onnx/embed_tokens.onnx",
+    "Url": "https://huggingface.co/onnx-community/chatterbox-ONNX/resolve/3cab09af388d3f02bba43443fce88c1f4525ac43/onnx/embed_tokens.onnx?download=true",
+    "Size": 13286,
+    "Sha256": "160722ec14789f616abdb1e31916cbbf9223c03fde0ab546d64ca74fb72e430b"
+  },
+  {
+    "Path": "chatterbox/onnx/embed_tokens.onnx_data",
+    "Url": "https://huggingface.co/onnx-community/chatterbox-ONNX/resolve/3cab09af388d3f02bba43443fce88c1f4525ac43/onnx/embed_tokens.onnx_data?download=true",
+    "Size": 61640704,
+    "Sha256": "898c563c3a5ca1b9ea10ce89b0cdcf252b0bb5ab460dfc4eadea003b56e5d2ee"
+  },
+  {
+    "Path": "chatterbox/onnx/language_model.onnx",
+    "Url": "https://huggingface.co/onnx-community/chatterbox-ONNX/resolve/3cab09af388d3f02bba43443fce88c1f4525ac43/onnx/language_model.onnx?download=true",
+    "Size": 171387,
+    "Sha256": "861a34585605e8ad671051788afc495dcbeaee833a41523a1b33aded9c3babc7"
+  },
+  {
+    "Path": "chatterbox/onnx/language_model.onnx_data",
+    "Url": "https://huggingface.co/onnx-community/chatterbox-ONNX/resolve/3cab09af388d3f02bba43443fce88c1f4525ac43/onnx/language_model.onnx_data?download=true",
+    "Size": 2080632832,
+    "Sha256": "efe9a1173c40d50bc651cb96ebff9f23d6f20d5b3a11b0685510e3a3facdbcf1"
+  },
+  {
+    "Path": "chatterbox/onnx/speech_encoder.onnx",
+    "Url": "https://huggingface.co/onnx-community/chatterbox-ONNX/resolve/3cab09af388d3f02bba43443fce88c1f4525ac43/onnx/speech_encoder.onnx?download=true",
+    "Size": 1184608,
+    "Sha256": "8f1c8a0f89b77bf9cd5dd8f2e034eb2c79dc00fe70d41196b28c257643b00ccb"
+  },
+  {
+    "Path": "chatterbox/onnx/speech_encoder.onnx_data",
+    "Url": "https://huggingface.co/onnx-community/chatterbox-ONNX/resolve/3cab09af388d3f02bba43443fce88c1f4525ac43/onnx/speech_encoder.onnx_data?download=true",
+    "Size": 591274880,
+    "Sha256": "04431dcef6325c54b02de2219845888b464bcd1f1ac2f8839c2fecd1ed2ef294"
+  },
+  {
+    "Path": "fixtures/f5-vocab.txt",
+    "Url": "https://raw.githubusercontent.com/SWivid/F5-TTS/main/src/f5_tts/infer/examples/vocab.txt",
+    "Size": 11255,
+    "Sha256": "4e173934be56219eb38759fa8d4c48132d5a34454f0c44abce409bcf6a07ec46"
+  },
+  {
+    "Path": "chatterbox/tokenizer.json",
+    "Url": "https://huggingface.co/onnx-community/chatterbox-ONNX/resolve/3cab09af388d3f02bba43443fce88c1f4525ac43/tokenizer.json",
+    "Size": 28543,
+    "Sha256": "ecddf6aaae85e271610a2743409f7e447886957d0b0836687c1eaec5ccac2891"
+  }
+]
