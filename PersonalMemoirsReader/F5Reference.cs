@@ -6,22 +6,7 @@ namespace PersonalMemoirsReader;
 
 public partial class MainForm
 {
-    private NumericUpDown referenceStart = null!;
-    private NumericUpDown referenceEnd = null!;
-    private Button previewReference = null!;
     private string? referencePreviewPath;
-
-    private void InitializeReferenceControls()
-    {
-        var startLabel = new Label { Text = "Reference start (s):", Location = new Point(16, 589), AutoSize = true };
-        referenceStart = new NumericUpDown { Location = new Point(145, 585), Width = 85, DecimalPlaces = 2, Maximum = 86400, Increment = 0.1M };
-        var endLabel = new Label { Text = "End (s, 0 = full):", Location = new Point(252, 589), AutoSize = true };
-        referenceEnd = new NumericUpDown { Location = new Point(370, 585), Width = 85, DecimalPlaces = 2, Maximum = 86400, Increment = 0.1M };
-        previewReference = new Button { Text = "Listen to F5 reference", Location = new Point(480, 582), Size = new Size(247, 30) };
-        previewReference.Click += PreviewReference_Click;
-        var help = new Label { Text = "Full recordings are accepted. Start/end are optional; leave both at zero to use the whole file.\nF5 handles reference preparation internally and may shorten long recordings.", Location = new Point(16, 619), Size = new Size(711, 36) };
-        Controls.AddRange(new Control[] { startLabel, referenceStart, endLabel, referenceEnd, previewReference, help });
-    }
 
     private void AddReferenceRange(ProcessStartInfo psi)
     {

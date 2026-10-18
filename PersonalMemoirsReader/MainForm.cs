@@ -18,7 +18,25 @@ public partial class MainForm : Form
     private string chatterboxPhase = "Starting";
     private SoundPlayer? samplePlayer;
     private dynamic? speech;
-    public MainForm() { InitializeComponent(); RefreshSamples(); InitializeSpeech(); chatterboxTimer.Tick += (_, _) => { if (generating) labelStatus.Text = $"AI engine: {chatterboxPhase} ({(int)(DateTime.Now - chatterboxStarted).TotalSeconds}s). Details: AI Log"; }; }
+    public MainForm()
+    {
+        InitializeComponent();
+    }
+
+    protected override void OnLoad(EventArgs e)
+    {
+        base.OnLoad(e);
+        if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime || DesignMode)
+            return;
+        Text = $"Personal Memoirs Reader v{Application.ProductVersion.Split('+')[0]}";
+        RefreshSamples();
+        InitializeSpeech();
+        chatterboxTimer.Tick += (_, _) =>
+        {
+            if (generating)
+                labelStatus.Text = $"AI engine: {chatterboxPhase} ({(int)(DateTime.Now - chatterboxStarted).TotalSeconds}s). Details: AI Log";
+        };
+    }
     private string ProfileFolder
     {
         get
