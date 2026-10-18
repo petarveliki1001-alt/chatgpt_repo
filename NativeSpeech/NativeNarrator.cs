@@ -2,10 +2,6 @@ using System.Diagnostics;
 using System.Text.Json;
 namespace MemoirsReader.Native;
 
-public sealed record NarrationRequest(string Engine, string Reference, string ReferenceTranscript, string Text, string Output, double Speed = 1);
-public sealed record NarrationReport(string Engine, int Threads, string Reference, string ReferenceTranscript, string Text,
-    bool ReusedModel, bool ReusedReference, double LoadSeconds, double SynthesisSeconds, double DurationSeconds, double[] ChunkSeconds);
-
 // One job at a time. Retains the active engine, releasing it when switching engines.
 public sealed class NativeNarrator : IDisposable
 {
@@ -13,6 +9,7 @@ public sealed class NativeNarrator : IDisposable
     private readonly int threads;
     private ChatterboxEngine? chatterbox;
     private F5Engine? f5;
+    private PocketClient? pocket;
     public NativeNarrator(ModelStore models, int? threads = null)
     {
         this.models = models;
@@ -22,13 +19,20 @@ public sealed class NativeNarrator : IDisposable
     public NarrationReport Generate(NarrationRequest request, Action<string> progress, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        if (request.Engine != "chatterbox" && request.Engine != "f5") throw new ArgumentException("Unknown speech engine.");
+        if (request.Engine != "chatterbox" && request.Engine != "f5" && request.Engine != "pocket") throw new ArgumentException("Unknown speech engine.");
         if (string.IsNullOrWhiteSpace(request.Text)) throw new ArgumentException("Enter narration text.");
         if (!File.Exists(request.Reference)) throw new ArgumentException("Select a voice sample.");
         if (request.Engine == "f5" && string.IsNullOrWhiteSpace(request.ReferenceTranscript))
             throw new ArgumentException("F5 needs the words spoken in the sample. Use Chatterbox for audio-only voice conditioning.");
         WaveAudio.Read(request.Reference); // Reject invalid input before loading any large models.
         if (!models.IsPresent(request.Engine)) throw new InvalidOperationException("Set up " + request.Engine + " models first.");
+        if (request.Engine == "pocket")
+        {
+            chatterbox?.Dispose(); chatterbox=null; f5?.Dispose(); f5=null;
+            pocket ??= new PocketClient(Path.Combine(models.Root,"pocket"),Math.Min(threads,2));
+            return pocket.Generate(request,progress,token);
+        }
+        pocket?.Dispose(); pocket=null;
         bool reusedModel = request.Engine == "chatterbox" ? chatterbox != null : f5 != null;
         var timer = Stopwatch.StartNew();
         progress($"CPU threads: {threads}; model {(reusedModel ? "reused" : "loading")}");
@@ -79,5 +83,5 @@ public sealed class NativeNarrator : IDisposable
         progress($"Saved {report.DurationSeconds:F2}s audio; loading {loadSeconds:F2}s; synthesis {synthesisSeconds:F2}s");
         return report;
     }
-    public void Dispose() { chatterbox?.Dispose(); f5?.Dispose(); }
+    public void Dispose() { chatterbox?.Dispose(); f5?.Dispose(); pocket?.Dispose(); }
 }

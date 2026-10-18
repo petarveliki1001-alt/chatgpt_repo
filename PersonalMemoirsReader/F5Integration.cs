@@ -38,7 +38,7 @@ public partial class MainForm
     private void SetAiBusy(bool busy)
     {
         generating=busy;
-        buttonF5.Enabled=buttonF5Setup.Enabled=buttonChatterbox.Enabled=buttonChatterboxSetup.Enabled=!busy;
+        buttonPocket.Enabled=buttonPocketSetup.Enabled=buttonUseNarration.Enabled=buttonF5.Enabled=buttonF5Setup.Enabled=buttonChatterbox.Enabled=buttonChatterboxSetup.Enabled=!busy;
         textReference.Enabled=textMemoir.Enabled=textProfile.Enabled=!busy;
         buttonOpenText.Enabled=numericF5Speed.Enabled=listSamples.Enabled=buttonDelete.Enabled=buttonImport.Enabled=!busy;
         buttonRecord.Enabled=!busy && recorder==null;
@@ -46,6 +46,16 @@ public partial class MainForm
         buttonCancelChatterbox.Enabled=busy || generatedPlayer!=null;
     }
     private async void buttonChatterbox_Click(object? sender, EventArgs e) => await GenerateNativeAsync("chatterbox",true);
+    private async void buttonPocket_Click(object? sender, EventArgs e) => await GenerateNativeAsync("pocket",true);
+    private async void buttonPocketSetup_Click(object? sender, EventArgs e) => await InstallModelsAsync("pocket");
+    private void buttonUseNarration_Click(object? sender, EventArgs e)
+    {
+        if(selectedFile==null || string.IsNullOrWhiteSpace(textMemoir.Text))
+        { MessageBox.Show(this,"Select a sample and enter its spoken words in Narration first."); return; }
+        textReference.Text=textMemoir.Text;
+        try { SaveTranscript(); labelStatus.Text="F5 sample script saved. It must match the complete selected recording."; }
+        catch(Exception ex) { MessageBox.Show(this,ex.Message,"Save sample script"); }
+    }
     private async void buttonF5_Click(object? sender, EventArgs e) => await GenerateNativeAsync("f5",true);
     private async void buttonF5Setup_Click(object? sender, EventArgs e) => await InstallModelsAsync("f5");
     private async void buttonChatterboxSetup_Click(object? sender, EventArgs e) => await InstallModelsAsync("chatterbox");
@@ -98,7 +108,7 @@ public partial class MainForm
         if (selectedFile==null || string.IsNullOrWhiteSpace(textMemoir.Text))
         { if(showErrors) MessageBox.Show(this,"Select a voice sample and enter narration text."); return null; }
         if(engine=="f5" && string.IsNullOrWhiteSpace(textReference.Text))
-        { if(showErrors) MessageBox.Show(this,"F5 requires the words spoken in this sample. Enter them once below; they will be saved for reuse. Chatterbox needs no transcript. No automatic transcription is included."); return null; }
+        { if(showErrors) MessageBox.Show(this,"F5 requires the words spoken in this sample. Enter them once below; they will be saved for reuse. PocketTTS and Chatterbox need no transcript. If Narration contains the sample’s exact words, use “Use narration as sample script”. No automatic transcription is included."); return null; }
         if(!modelStore.IsPresent(engine))
         { if(showErrors) MessageBox.Show(this,"Use Set up "+engine+" to download its native models once."); return null; }
         string output=Path.Combine(dataRoot,"Narrations",engine+"_"+DateTime.Now.ToString("yyyyMMdd_HHmmssfff")+"_"+Guid.NewGuid().ToString("N")[..6]+".wav");

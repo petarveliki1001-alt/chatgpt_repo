@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>0.1.36</Version>
+    <Version>0.1.37</Version>
     <AssemblyName>MemoirsReader</AssemblyName>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
@@ -16,4 +16,9 @@
     <None Include="../NativeSpeech/models.json" Link="models.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup><None Remove="*.py" /></ItemGroup>
+  <ItemGroup><ProjectReference Include="../PocketWorker/PocketWorker.csproj" ReferenceOutputAssembly="false" Private="false" /></ItemGroup>
+  <Target Name="CopyPocketWorker" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true'">
+    <ItemGroup><PocketFiles Include="../PocketWorker/bin/$(Configuration)/net8.0/**/*" /></ItemGroup>
+    <Copy SourceFiles="@(PocketFiles)" DestinationFiles="@(PocketFiles->'$(OutDir)SpeechWorker/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

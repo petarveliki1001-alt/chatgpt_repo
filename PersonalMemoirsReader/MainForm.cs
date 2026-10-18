@@ -36,7 +36,7 @@ public partial class MainForm : Form
         chatterboxTimer.Tick += (_, _) =>
         {
             if (generating)
-                labelStatus.Text = $"AI engine: {chatterboxPhase} ({(int)(DateTime.Now - chatterboxStarted).TotalSeconds}s). Details: AI Log";
+                labelStatus.Text = $"AI engine: {chatterboxPhase} ({(int)(DateTime.Now - chatterboxStarted).TotalSeconds}s). Details: Speech Log";
         };
     }
     private string ProfileFolder
@@ -193,7 +193,7 @@ public partial class MainForm : Form
                 comboVoices.Items.Add((string)token.GetDescription());
             }
             if (comboVoices.Items.Count > 0) comboVoices.SelectedIndex = 0;
-            labelStatus.Text = "Choose a sample and enter narration. Chatterbox needs no transcript. CPU generation may take longer than playback.";
+            labelStatus.Text = "Choose a sample and enter narration. PocketTTS and Chatterbox need no transcript.";
             buttonGenerate.Enabled = count > 0;
         }
         catch (Exception ex)

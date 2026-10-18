@@ -1,40 +1,44 @@
-# Memoirs Reader v0.1.36
+# Memoirs Reader v0.1.37
 
-Windows x64 desktop app. Select a voice recording, enter narration text, and generate speech in the sample voice. The editable WinForms project and executable are delivered together in `MemoirsReader_v0.1.36.zip`, under the folder `MemoirsReader_v0.1.36/`.
+Windows x64 WinForms application: select a voice recording, enter narration, and generate speech in that voice. This delivery is **editable source only**, under `MemoirsReader_v0.1.37/` in `MemoirsReader_v0.1.37.zip`. No compiled executables, DLLs, Python, Whisper, model weights, or research projects are bundled.
 
-## Open or run
+## Open in Visual Studio
 
-- **Run:** open `MemoirsReader.exe`. Requires Microsoft .NET 8 Desktop Runtime x64. A dedicated GPU and Python are not required.
-- **Edit:** open `MemoirsReader.sln` in Visual Studio 2022 17.8+ with the .NET desktop development workload. Right-click `MainForm.cs` → **View Designer**. Press F5 to build/run. Source files remain separate from Designer layout.
-- **First speech use:** click **Set up Chatterbox**, then **Generate with Chatterbox**. Setup displays its native-model download size (about 3.27 GB) before downloading. Models are verified with pinned SHA-256 hashes. Generation subsequently runs offline. Models and environments from the old Python implementation are not used or changed.
+Extract to a new folder and open **MemoirsReader.sln** in Visual Studio with the **.NET desktop development** workload and .NET 8 SDK. Set **MemoirsReader** as the startup project, then press F5. NuGet restores the pinned native runtime dependencies. Visual Studio compiles the C# programs on your PC.
 
-## Engines and behavior
+To edit the form, right-click `PersonalMemoirsReader/MainForm.cs` and choose **View Designer**. Its controls and layout are in `MainForm.Designer.cs`; runtime model loading occurs after the form opens, outside Designer initialization. Interactive Visual Studio Designer operation has not been automated.
 
-**Chatterbox** is the direct sample-plus-text path: no reference transcript is needed. English ONNX FP32 models run through C# and native ONNX Runtime. Longer text is split at sentence/word boundaries, with every section generated in order and a short pause between sections. A missing stop token fails the job rather than silently accepting truncated audio. The native decoder uses greedy generation and fixed exaggeration 0.5; full parity with the previous Python sampling controls is not claimed.
+The solution contains three projects: MemoirsReader (the form), NativeSpeech (F5/Chatterbox and model management), and PocketWorker (the C# PocketTTS host). Building the startup project also builds PocketWorker and places it in `SpeechWorker` beside the application. It runs as a retained native worker to keep its runtime separate from the other engines; **it is not Python**. All its source is included. Building does not download speech models. The archive has no prebuilt application executable.
 
-**F5** is optional and remains CPU intensive. It requires the exact words spoken in the sample. Enter a known script/manual transcript once; it is saved under a hash of that sample's content and reloaded when that sample is selected again. There is no automatic transcription, Whisper dependency or download. F5 setup downloads the verified native model archive and English vocabulary (about 1.34 GB, plus extraction disk space). This native export uses 31 integration intervals from 32 time points. Speaking speed controls generated duration; the native text path currently supports English. Full recordings are used without an application duration cutoff or silent internal clipping. Large references/narrations can be expensive; a matching transcript must describe the entire selected file.
+## What changed
 
-The active engine stays loaded for the life of the app and caches the last sample's prepared conditioning. Switching engines releases the previous engine to limit memory use. CPU threads default to the available processor count capped at four, a conservative measured starting point rather than workstation-specific tuning. No GPU package is installed. No real-time CPU performance is promised: the earlier native F5 CPU test took about 88 seconds for 4 seconds of audio on the hosted test machine.
+- Added **PocketTTS** as an explicitly named CPU option alongside F5 and Chatterbox. It takes the sample audio and narration directly, with no reference transcript, transcription model, or GPU requirement. The full recording is passed without an application duration cutoff. Native model behavior and speaker similarity still require listening assessment; identical quality across these different engines is not claimed.
+- PocketTTS keeps its worker and speech model loaded between requests. Stop interrupts its worker and discards incomplete output; the next request starts it again. The other engines retain their prior cancellation behavior: an active native operation finishes before stopping.
+- Added **Use narration as sample script** for F5. Click it only when Narration contains exactly the words in the complete sample recording; it saves the script for reuse with that sample. It does not infer that unrelated narration matches a recording and does not transcribe anything.
+- Changed delivery to source only, with a simple, matching versioned ZIP and folder.
 
-**Stop AI / Playback** requests cancellation between native model calls; the active call must finish first. Canceled generation does not publish an incomplete WAV. Closing while a job is active requests cancellation and waits for that call before releasing native resources. Setup downloads can also be canceled. The live Speech Log records failures and generation phases. Output JSON/text records model reuse, reference reuse, loading time, synthesis time, and output duration.
+## Speech engines and model locations
 
-Recording and WAV import, installed Windows voices, sample playback, and comparisons remain available. The Windows voice is ordinary system speech, not voice cloning. WAV references must be PCM16 or float32; other formats require a separately selected FFmpeg executable for conversion. Voice sample names are displayed without their directory prefixes.
+Choose **Set up PocketTTS**, **Set up Chatterbox**, or **Set up F5** once for the engine you want. Setup asks before downloading, verifies SHA-256 checksums against pinned revisions in `NativeSpeech/models.json`, and then generation works offline. Installing one engine does not require installing the others.
 
-## Data and previous versions
-
-All program files live in the versioned extraction folder. Existing recordings/narrations in `Documents\Personal Memoirs Reader` are retained. Native models and saved F5 transcripts live in `%LOCALAPPDATA%\MemoirsReader`. The app does not uninstall Python or delete previous models. Each changed release gets a new version; archives are never overwritten with different contents under the same version.
-
-For development/automation, `MEMOIRS_MODEL_ROOT` overrides the native model directory and `MEMOIRS_DATA_ROOT` overrides the recording/output directory. Keep reference samples and generated input metadata private unless deliberately sharing them.
-
-## Build and verification
+PocketTTS downloads about **198 MB** (English int8 ONNX export, native sherpa-onnx 1.13.8). Chatterbox downloads about 3.28 GB; F5 about 1.34 GB plus extraction space. Existing F5/Chatterbox model paths remain unchanged:
 
 ```
-dotnet build MemoirsReader.sln -c Release
-dotnet run --project NativeSpeech.Tests -c Release -- NativeSpeech/models.json
-dotnet publish PersonalMemoirsReader -c Release -r win-x64 --self-contained false -o artifacts/app
-pwsh tools/package-release.ps1
+%LOCALAPPDATA%\MemoirsReader\NativeModels\pocket
+%LOCALAPPDATA%\MemoirsReader\NativeModels\chatterbox
+%LOCALAPPDATA%\MemoirsReader\NativeModels\f5
 ```
 
-Linux cross-builds require `-p:EnableWindowsTargeting=true`. No Python scripts are part of the current app or release workflow. Archived Python verification scripts and older ZIPs in the repository are historical and are not packaged.
+Existing recordings and generated audio remain under `Documents\Personal Memoirs Reader`. F5 scripts remain under `%LOCALAPPDATA%\MemoirsReader\Transcripts`, keyed by the recording's content. Versioned source folders coexist; recordings/models are shared. No previous Python installation or cache is removed or used.
 
-`.github/workflows/desktop-release.yml` builds on Windows, runs the C# checks, downloads/verifies the two engines' models with no ASR, opens the actual form, generates through desktop handlers, verifies warm Chatterbox engine/reference reuse and F5 transcript persistence, validates WAV outputs, and packages only after these checks pass. Results distinguish pipeline verification from sound quality: neither automatic transcription nor a human listening assessment is performed. Interactive Visual Studio Designer behavior is prepared in source but is not exercised by that smoke test. Neural output can still mispronounce, repeat, or differ from a sample; this release does not claim universal voice-quality or performance parity.
+Chatterbox uses the sample without a transcript, splits long narration at sentence/word boundaries, uses greedy decoding and fixed exaggeration 0.5. Its model and prepared reference are retained while it remains the active engine. F5 requires a matching reference script, remains CPU intensive, uses 31 integration intervals, and supports English in this export. Switching engines releases the previous engine to bound memory. Removing Python alone does not make those older models fast.
+
+The Speech Log and each generated `.wav.json` record engine, threads, model/reference reuse, loading time, synthesis time, and output duration. Cancellation rejects unfinished WAVs. Use **Compare WAV Files** to compare generated speech against the source recording. Model speed measurements and valid WAV output do not establish pronunciation accuracy or voice fidelity.
+
+## Validation and dependencies
+
+The Windows release workflow packages the source, extracts that exact ZIP, builds it, loads the form, generates audio through desktop handlers, checks cold/warm PocketTTS and Chatterbox use, generates longer PocketTTS narration, interrupts/restarts PocketTTS, checks F5 script persistence and generation, and reads finalized WAVs. Results are saved separately in `verification/results/desktop-v0.1.37/` in the repository; they are not bundled research tools. No automatic transcription or human listening assessment is performed by this check.
+
+The primary native dependencies are ONNX Runtime 1.22.0 for the existing engines and sherpa-onnx 1.13.8 for PocketTTS. Runtime packages are restored by NuGet. No Python operation is required to build, package, or run this version. The PocketTTS model export is pinned to `csukuangfj2/sherpa-onnx-pocket-tts-int8-2026-01-26`, revision `e715955cf50d18d919d37231513c0e914b83661a`; see the included model license and upstream model card before redistribution/commercial use (the card states non-commercial use). Credits: Kyutai PocketTTS, KevinAHM ONNX export, and k2-fsa sherpa-onnx. Licenses are under `NativeSpeech/licenses`.
+
+To run the existing native checks: `dotnet run --project NativeSpeech.Tests -c Release -- NativeSpeech/models.json`. To create a fresh versioned source ZIP after changing the version: `pwsh tools/package-release.ps1`. The packager refuses to replace an existing delivery. No extra title suffixes are used.
