@@ -12,7 +12,20 @@ on:
       - '.github/workflows/desktop-release.yml'
 permissions:
   contents: write
+  actions: read
 jobs:
+  previous-diagnostic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: MemoirsReader-v0.1.36-validation
+          run-id: 39161770835
+          github-token: ${{ github.token }}
+          path: previous-diagnostic
+      - name: Report previous desktop failure
+        run: |
+          node -e 'const fs=require("fs"); const p="previous-diagnostic/failure.txt"; if(fs.existsSync(p)) {const text=fs.readFileSync(p,"utf8");console.log("::notice title=Desktop failure diagnostic::"+text.replace(/%/g,"%25").replace(/\r/g,"%0D").replace(/\n/g,"%0A"));} else {console.log(fs.readdirSync("previous-diagnostic"));}'
   desktop:
     runs-on: windows-latest
     timeout-minutes: 40
@@ -50,7 +63,13 @@ jobs:
           $models = Join-Path $env:RUNNER_TEMP 'memoirs-models'
           $results = Join-Path $env:GITHUB_WORKSPACE 'verification/results/desktop-v0.1.36'
           $process = Start-Process -FilePath (Resolve-Path 'artifacts/app/MemoirsReader.exe') -ArgumentList @('--smoke',"`"$models`"","`"$models/reference.wav`"","`"$results`"") -Wait -PassThru
-          if ($process.ExitCode -ne 0) { if (Test-Path "$results/failure.txt") { Get-Content "$results/failure.txt" }; throw "Desktop smoke exit: $($process.ExitCode)" }
+          if ($process.ExitCode -ne 0) {
+            if (Test-Path "$results/failure.txt") {
+              $message = (Get-Content "$results/failure.txt" -Raw).Replace('%','%25').Replace("`r",'%0D').Replace("`n",'%0A')
+              Write-Output "::error title=Desktop smoke diagnostic::$message"
+            }
+            throw "Desktop smoke exit: $($process.ExitCode)"
+          }
           if (!(Test-Path "$results/desktop-smoke.json")) { throw 'Desktop test produced no results.' }
           Get-Content "$results/desktop-smoke.json"
       - name: Package tested executable and editable source together
