@@ -67,7 +67,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add downloads/MemoirsReader_v0.1.36.zip verification/results/desktop-v0.1.36/desktop-smoke.json
+          git add downloads/MemoirsReader_v0.1.36.zip verification/results/desktop-v0.1.36/desktop-smoke.json verification/results/desktop-v0.1.36/form.png
           git commit -m 'Deliver tested Memoirs Reader v0.1.36 executable and editable source [skip ci]'
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           git push origin HEAD:native-runtime-verification

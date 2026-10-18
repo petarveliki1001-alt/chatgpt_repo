@@ -8,6 +8,11 @@ public partial class MainForm
         Directory.CreateDirectory(results);
         if (Text != "Memoirs Reader v0.1.36" || buttonChatterbox.Text != "Generate with Chatterbox")
             throw new InvalidOperationException("Form layout/title did not initialize.");
+        using (var bitmap = new Bitmap(Width,Height))
+        {
+            DrawToBitmap(bitmap,new Rectangle(0,0,Width,Height));
+            bitmap.Save(Path.Combine(results,"form.png"),System.Drawing.Imaging.ImageFormat.Png);
+        }
         listSamples.Items.Add(reference); listSamples.SelectedItem=reference;
         if (selectedFile!=reference) throw new InvalidOperationException("Sample selection did not reach the form.");
         textMemoir.Text="The small boat crossed the quiet lake.";

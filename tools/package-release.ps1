@@ -21,6 +21,7 @@ foreach ($directory in @('PersonalMemoirsReader','NativeSpeech','NativeSpeech.Te
     New-Item -ItemType Directory -Force $destination | Out-Null
     Get-ChildItem $directory -File | Where-Object { $_.Extension -in @('.cs','.csproj','.json','.ps1') } | Copy-Item -Destination $destination
 }
+Copy-Item NativeSpeech/licenses -Destination "$stage/NativeSpeech" -Recurse
 New-Item -ItemType Directory -Force (Split-Path $out -Parent) | Out-Null
 Compress-Archive -Path $stage -DestinationPath $out -CompressionLevel Optimal
 Add-Type -AssemblyName System.IO.Compression.FileSystem
