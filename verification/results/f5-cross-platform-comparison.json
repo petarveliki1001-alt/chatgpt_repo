@@ -1,0 +1,9 @@
+{
+  "first": "verification/results/linux/native-f5-auto.wav",
+  "second": "verification/results/windows/f5.wav",
+  "sameLength": true,
+  "firstSamples": 97024,
+  "secondSamples": 97024,
+  "rmse": 0.2116806503732585,
+  "maxDifference": 1.5293579
+}

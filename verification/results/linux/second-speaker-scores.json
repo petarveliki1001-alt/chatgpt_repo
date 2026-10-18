@@ -1,0 +1,18 @@
+{
+  "reference": "/workspace/scratch/native-verification/models/chatterbox/default_voice.wav",
+  "method": "Chatterbox reference-speaker embeddings; diagnostic similarity only, not a listening-quality score",
+  "comparisons": [
+    {
+      "file": "/workspace/scratch/native-verification/results/native-chatterbox-second-voice.wav",
+      "cosine": 0.863085479651622
+    },
+    {
+      "file": "/workspace/scratch/native-verification/results/native-chatterbox.wav",
+      "cosine": 0.6363599548342134
+    },
+    {
+      "file": "/workspace/scratch/f5-investigation/official_reference.wav",
+      "cosine": 0.5384388748634268
+    }
+  ]
+}

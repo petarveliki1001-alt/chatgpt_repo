@@ -1,0 +1,8 @@
+{
+  "comparison": "same F5 ONNX graphs, same captured inputs/noise, .NET vs Python bindings",
+  "samples": 97024,
+  "same_length": true,
+  "exact_pcm_match": true,
+  "max_pcm_difference": 0,
+  "seconds": 119.24573567399966
+}

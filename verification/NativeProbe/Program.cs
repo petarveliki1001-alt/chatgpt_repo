@@ -36,6 +36,22 @@ if (args[0] == "tokenize")
     Console.WriteLine(string.Join(',', new BpeTokenizer(args[1]).Encode(args[2])));
     return;
 }
+if (args[0] == "compare-wave")
+{
+    var (a, rateA) = WaveAudio.Read(args[1]);
+    var (b, rateB) = WaveAudio.Read(args[2]);
+    bool sameLength = a.Length == b.Length && rateA == rateB;
+    double? rmse = sameLength ? Math.Sqrt(a.Zip(b, (x,y) => (double)(x-y)*(x-y)).Average()) : null;
+    float? maxDifference = sameLength ? a.Zip(b, (x,y) => Math.Abs(x-y)).Max() : null;
+    var report = JsonSerializer.Serialize(new {first=args[1],second=args[2],sameLength,firstSamples=a.Length,secondSamples=b.Length,rmse,maxDifference},new JsonSerializerOptions{WriteIndented=true});
+    File.WriteAllText(args[3],report); Console.WriteLine(report);
+    return;
+}
+if (args[0] == "speaker-scores")
+{
+    SpeakerScores.Compare(args[1], args[2], args[3], args.Skip(4).ToArray());
+    return;
+}
 if (args[0] == "download")
 {
     if (args.Length != 3) throw new ArgumentException("download <manifest.json> <model-directory>");

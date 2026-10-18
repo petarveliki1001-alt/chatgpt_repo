@@ -1,0 +1,9 @@
+{
+  "first": "/workspace/scratch/native-verification/results/native-chatterbox.wav",
+  "second": "/workspace/scratch/native-verification/results/python-chatterbox-onnx.wav",
+  "sameLength": true,
+  "firstSamples": 58560,
+  "secondSamples": 58560,
+  "rmse": 0.23615627485642318,
+  "maxDifference": 1.7072144
+}

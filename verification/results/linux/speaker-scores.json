@@ -1,0 +1,26 @@
+{
+  "reference": "/workspace/scratch/f5-investigation/official_reference.wav",
+  "method": "Chatterbox reference-speaker embeddings; diagnostic similarity only, not a listening-quality score",
+  "comparisons": [
+    {
+      "file": "/workspace/scratch/native-verification/results/native-chatterbox.wav",
+      "cosine": 0.7941921224500542
+    },
+    {
+      "file": "/workspace/scratch/native-verification/results/python-chatterbox-onnx.wav",
+      "cosine": 0.7568800743170736
+    },
+    {
+      "file": "/workspace/scratch/native-verification/results/native-f5-auto.wav",
+      "cosine": 0.8174387203805145
+    },
+    {
+      "file": "/workspace/scratch/native-verification/python-f5.wav",
+      "cosine": 0.7657735878074307
+    },
+    {
+      "file": "/workspace/scratch/native-verification/models/chatterbox/default_voice.wav",
+      "cosine": 0.5384388748634268
+    }
+  ]
+}

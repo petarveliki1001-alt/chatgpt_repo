@@ -1,0 +1,11 @@
+{
+  "engine": "Chatterbox ONNX FP32, C#",
+  "reference": "/workspace/scratch/native-verification/models/chatterbox/default_voice.wav",
+  "text": "The small boat crossed the quiet lake.",
+  "tokens": 57,
+  "loadSeconds": 37.3963111,
+  "inferenceSeconds": 12.5433556,
+  "durationSeconds": 2.28,
+  "rms": 0.14128033812683735,
+  "peak": 1.0517555
+}

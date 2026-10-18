@@ -1,0 +1,7 @@
+{
+  "audio": "/workspace/scratch/native-verification/python-f5.wav",
+  "text": "The small boat crossed the quiet lake.",
+  "expected": "The small boat crossed the quiet lake.",
+  "matches": true,
+  "seconds": 18.5729304
+}

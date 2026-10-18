@@ -1,0 +1,1 @@
+Linux container, native .NET 8 / ONNX Runtime 1.22.0 CPU / whisper.cpp via Whisper.net 1.9.1. Available 5 vCPUs. Several tests ran concurrently: timings are not controlled performance benchmarks.

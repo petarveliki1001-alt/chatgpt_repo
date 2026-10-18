@@ -1,0 +1,7 @@
+{
+  "audio": "/workspace/scratch/native-verification/results/native-chatterbox.wav",
+  "text": "The small boat crossed the quiet lake.",
+  "expected": "The small boat crossed the quiet lake.",
+  "matches": true,
+  "seconds": 49.7201235
+}

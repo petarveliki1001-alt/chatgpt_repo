@@ -1,0 +1,12 @@
+{
+  "engine": "F5 ONNX FP32, C#",
+  "reference": "/workspace/scratch/f5-investigation/official_reference.wav",
+  "referenceText": "Some call me nature. Others call me Mother Nature.",
+  "narration": "The small boat crossed the quiet lake.",
+  "steps": 31,
+  "loadSeconds": 1.6748026,
+  "inferenceSeconds": 179.7202405,
+  "durationSeconds": 4.042666666666666,
+  "rms": 0.14996031691081713,
+  "peak": 1
+}
