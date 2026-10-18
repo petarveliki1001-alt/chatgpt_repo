@@ -9,6 +9,7 @@ public partial class MainForm : Form
     private WaveRecorder? recorder;
     private string? pendingRecording;
     private string? selectedFile;
+    private string? loadedProfileFolder;
     private bool generating;
 
     private SoundPlayer? generatedPlayer;
@@ -50,6 +51,7 @@ public partial class MainForm : Form
     }
     private void RefreshSamples(string? preferred = null)
     {
+        loadedProfileFolder = ProfileFolder;
         string? previously = preferred ?? selectedFile;
         listSamples.Items.Clear();
         if (Directory.Exists(ProfileFolder))
@@ -170,7 +172,12 @@ public partial class MainForm : Form
         using var d = new SaveFileDialog { Filter = "Text files (*.txt)|*.txt", FileName = "memoir.txt" };
         if (d.ShowDialog(this) == DialogResult.OK) File.WriteAllText(d.FileName, textMemoir.Text);
     }
-    private void textProfile_Leave(object? sender, EventArgs e) { selectedFile = null; RefreshSamples(); }
+    private void textProfile_Leave(object? sender, EventArgs e)
+    {
+        if (string.Equals(loadedProfileFolder, ProfileFolder, StringComparison.OrdinalIgnoreCase)) return;
+        selectedFile = null;
+        RefreshSamples();
+    }
     // Windows SAPI 5 desktop voice engine. Offline speech, NOT voice cloning.
     private void InitializeSpeech()
     {

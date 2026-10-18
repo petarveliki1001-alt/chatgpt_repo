@@ -16,7 +16,9 @@ public partial class MainForm
         listSamples.Items.Add(reference); listSamples.SelectedItem=reference;
         if (selectedFile!=reference) throw new InvalidOperationException("Sample selection did not reach the form.");
         textMemoir.Text="The small boat crossed the quiet lake.";
+        textProfile.Focus(); // Disabling this field must not refresh/clear an unchanged profile.
         var first=await GenerateNativeAsync("chatterbox",false,false) ?? throw new InvalidOperationException("First generation did not start.");
+        if(selectedFile!=reference) throw new InvalidOperationException("Voice selection changed during generation.");
         var second=await GenerateNativeAsync("chatterbox",false,false) ?? throw new InvalidOperationException("Second generation did not start.");
         if (first.ReusedModel || first.ReusedReference || !second.ReusedModel || !second.ReusedReference)
             throw new InvalidOperationException("Warm engine/reference reuse failed.");
