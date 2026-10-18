@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "absoluteErrors": [
+    0.006496906280517578,
+    0,
+    0.004761934280395508
+  ],
+  "tolerance": 0.05,
+  "originalUnchanged": true,
+  "scope": "Independent FP32-versus-derived integer MatMul checks: mixed signed inputs, zero activations, constant positive activations, per-column scaling and zero-weight column. Does not certify speech quality."
+}
