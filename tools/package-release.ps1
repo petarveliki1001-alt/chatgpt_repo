@@ -14,7 +14,7 @@ if ($bad) { throw 'Unexpected Python/Whisper file in published app.' }
 $stage = Join-Path $root "artifacts/package/$name"
 if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
 New-Item -ItemType Directory -Force $stage | Out-Null
-Get-ChildItem $Published -Exclude '*.pdb' | Copy-Item -Destination $stage -Recurse
+Get-ChildItem $Published -Exclude '*.pdb','*.lib' | Copy-Item -Destination $stage -Recurse
 Copy-Item MemoirsReader.sln,README.md -Destination $stage
 foreach ($directory in @('PersonalMemoirsReader','NativeSpeech','NativeSpeech.Tests','tools')) {
     $destination = Join-Path $stage $directory

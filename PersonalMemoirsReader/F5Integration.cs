@@ -55,7 +55,14 @@ public partial class MainForm
         double gigabytes=modelStore.Files(engine).Sum(x=>x.Size)/1e9;
         if (MessageBox.Show(this,$"Download and verify the native {engine} speech models ({gigabytes:F2} GB) from Hugging Face?\n\nNo Python or transcription model is installed. Generation is offline after setup. Existing Python installations are untouched.","Speech model setup",MessageBoxButtons.YesNo)!=DialogResult.Yes) return;
         SetAiBusy(true); generationCancellation=new();
-        try { BeginRun(engine+"_Setup.log"); await Task.Run(()=>modelStore.InstallAsync(engine,LogNative,generationCancellation.Token)); labelStatus.Text=engine+" models verified and ready."; }
+        try
+        {
+            BeginRun(engine+"_Setup.log");
+            // Release Windows model-file handles before verifying/replacing an installation.
+            narrator?.Dispose(); narrator=new NativeNarrator(modelStore);
+            await Task.Run(()=>modelStore.InstallAsync(engine,LogNative,generationCancellation.Token));
+            labelStatus.Text=engine+" models verified and ready.";
+        }
         catch (OperationCanceledException) { LogNative("Setup canceled."); labelStatus.Text="Setup canceled. Verified downloads are retained."; }
         catch (Exception ex) { LogNative(ex.ToString()); labelStatus.Text="Setup failed. Open Speech Log."; MessageBox.Show(this,ex.Message,"Model setup"); }
         finally { FinishRun(); }
