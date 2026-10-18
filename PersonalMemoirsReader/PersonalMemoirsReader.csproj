@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Update="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup><None Update="chatterbox_worker.py" CopyToOutputDirectory="PreserveNewest" /><None Update="f5_worker.py" CopyToOutputDirectory="PreserveNewest" /><None Update="f5_setup_worker.py" CopyToOutputDirectory="PreserveNewest" /><None Update="voice_color_worker.py" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
+</Project>
