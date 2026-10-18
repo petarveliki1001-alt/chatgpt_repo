@@ -1,0 +1,52 @@
+{
+  "passed": true,
+  "version": "0.1.36\u002Bf8ddb91dabe50664547a0ff697053c888a53e6c5",
+  "platform": "Microsoft Windows 10.0.26100",
+  "formControls": 35,
+  "first": {
+    "Engine": "chatterbox",
+    "Threads": 4,
+    "Reference": "D:\\a\\_temp\\memoirs-models\\reference.wav",
+    "ReferenceTranscript": "",
+    "Text": "The small boat crossed the quiet lake.",
+    "ReusedModel": false,
+    "ReusedReference": false,
+    "LoadSeconds": 73.6235289,
+    "SynthesisSeconds": 14.7028963,
+    "DurationSeconds": 2.44,
+    "ChunkSeconds": [
+      14.6951958
+    ]
+  },
+  "second": {
+    "Engine": "chatterbox",
+    "Threads": 4,
+    "Reference": "D:\\a\\_temp\\memoirs-models\\reference.wav",
+    "ReferenceTranscript": "",
+    "Text": "The small boat crossed the quiet lake.",
+    "ReusedModel": true,
+    "ReusedReference": true,
+    "LoadSeconds": 0.0001762,
+    "SynthesisSeconds": 13.9905118,
+    "DurationSeconds": 2.44,
+    "ChunkSeconds": [
+      13.9901709
+    ]
+  },
+  "f5": {
+    "Engine": "f5",
+    "Threads": 4,
+    "Reference": "D:\\a\\_temp\\memoirs-models\\reference.wav",
+    "ReferenceTranscript": "Some call me nature. Others call me Mother Nature.",
+    "Text": "The small boat crossed the quiet lake.",
+    "ReusedModel": false,
+    "ReusedReference": false,
+    "LoadSeconds": 2.1094461,
+    "SynthesisSeconds": 165.4541316,
+    "DurationSeconds": 4.042666666666666,
+    "ChunkSeconds": [
+      165.4536765
+    ]
+  },
+  "scope": "Actual form load, voice selection, generation through desktop handlers, warm model/reference reuse, saved transcript reload, finalized WAV decoding. No ASR or listening assessment."
+}
