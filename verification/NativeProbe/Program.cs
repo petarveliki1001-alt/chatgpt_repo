@@ -5,9 +5,15 @@ using System.Text.Json;
 Console.WriteLine($"Native ONNX Runtime: {OrtEnv.Instance().GetVersionString()}");
 Console.WriteLine($"Providers: {string.Join(", ", OrtEnv.Instance().GetAvailableProviders())}");
 if (args.Length == 0) return;
+if (args[0] == "cpu-benchmark")
+{
+    if (args.Length != 4) throw new ArgumentException("cpu-benchmark <f5-model-directory> <captured-wav-prefix> <report.json>");
+    CpuBenchmark.Run(args[1], args[2], args[3]);
+    return;
+}
 if (args[0] == "f5")
 {
-    F5Probe.Generate(args[1], args[2], args[3], args[4], args[5], args[6]);
+    F5Probe.Generate(args[1], args[2], args[3], args[4], args[5], args[6], args.Length > 7 ? int.Parse(args[7]) : 4);
     return;
 }
 if (args[0] == "f5-auto")

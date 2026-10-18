@@ -1,0 +1,41 @@
+{
+  "platform": "Debian GNU/Linux 13 (trixie)",
+  "logicalProcessors": 4,
+  "runtime": "1.22.0",
+  "scope": "FP32 native ONNX transformer, same first-step inputs; one warmup and three measured repetitions per setting. Not full synthesis or a quality assessment.",
+  "rows": [
+    {
+      "threads": 1,
+      "loadSeconds": 1.9065657,
+      "measuredStepSeconds": [
+        9.2213289,
+        9.3625711,
+        9.6483364
+      ],
+      "medianStepSeconds": 9.3625711,
+      "checksum": -429.1385942180059
+    },
+    {
+      "threads": 2,
+      "loadSeconds": 1.2905243,
+      "measuredStepSeconds": [
+        6.2220077,
+        7.2781514,
+        6.0502598
+      ],
+      "medianStepSeconds": 6.2220077,
+      "checksum": -429.13858077420446
+    },
+    {
+      "threads": 4,
+      "loadSeconds": 1.1873764,
+      "measuredStepSeconds": [
+        2.8076939,
+        2.6872401,
+        2.6104595
+      ],
+      "medianStepSeconds": 2.6872401,
+      "checksum": -429.13858575328777
+    }
+  ]
+}
