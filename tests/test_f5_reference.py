@@ -28,10 +28,14 @@ class ReferenceTests(unittest.TestCase):
         audio = (0.2 * np.sin(2 * np.pi * 220 * t)).astype("float32")
         sf.write(self.source, np.column_stack([audio, audio]), self.rate, subtype="PCM_16")
 
-    def test_long_recording_is_not_silently_paired_with_guessed_transcript(self):
-        with self.assertRaisesRegex(ValueError, "1–11 second"):
-            worker.prepare_wav(self.source, self.output, "First sentence. Second sentence.")
-        self.assertFalse(self.output.exists())
+    def test_long_recording_is_accepted_in_full_without_guessed_transcript(self):
+        transcript = "First sentence. Second sentence."
+        self.assertEqual(worker.prepare_wav(self.source, self.output, transcript), transcript)
+        self.assertEqual(sf.info(self.output).frames, 15 * self.rate)
+
+    def test_shorter_than_one_second_is_not_arbitrarily_rejected(self):
+        worker.prepare_wav(self.source, self.output, "Words.", 0, .5)
+        self.assertEqual(sf.info(self.output).frames, self.rate // 2)
 
     def test_explicit_excerpt_keeps_exact_audio_and_full_supplied_transcript(self):
         transcript = "First sentence. Second sentence. Third sentence."
@@ -49,7 +53,7 @@ class ReferenceTests(unittest.TestCase):
         self.assertEqual(sf.info(self.output).frames, 2 * self.rate)
 
     def test_invalid_ranges_are_rejected(self):
-        for start, end in [(-1, 3), (3, 2), (0, 16), (0, .5), (float("nan"), 3), (0, float("inf"))]:
+        for start, end in [(-1, 3), (3, 2), (0, 16), (0, 0), (float("nan"), 3), (0, float("inf"))]:
             with self.subTest(start=start, end=end), self.assertRaises(ValueError):
                 worker.prepare_wav(self.source, self.output, "Words.", start, end)
 
@@ -92,13 +96,12 @@ class ReferenceTests(unittest.TestCase):
         api = types.ModuleType("f5_tts.api")
         api.F5TTS = FakeF5
         argv = [str(WORKER), "--reference", str(self.source), "--reference-text", str(transcript),
-                "--text-file", str(target), "--output", str(self.output),
-                "--reference-start", "2", "--reference-end", "7"]
+                "--text-file", str(target), "--output", str(self.output)]
         with patch.dict(sys.modules, {"f5_tts.api": api}), patch.object(sys, "argv", argv), \
                 patch.object(worker, "install_wav_compatibility"):
             worker.main()
         args, frames = calls[0]
-        self.assertEqual(frames, 5 * self.rate)
+        self.assertEqual(frames, 15 * self.rate)
         self.assertEqual(args["ref_text"], "These are the exact reference words.")
         self.assertEqual(args["gen_text"], "This is a different narration.")
         self.assertEqual(args["nfe_step"], 32)

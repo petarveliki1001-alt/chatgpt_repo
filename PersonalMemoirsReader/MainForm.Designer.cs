@@ -57,7 +57,7 @@ namespace PersonalMemoirsReader
             textReference.PlaceholderText = "Exact words spoken in the reference excerpt";
             labelF5Speed.Location = new Point(404, 551); labelF5Speed.AutoSize = true; labelF5Speed.Text = "F5 speaking speed:";
             numericF5Speed.Location = new Point(538, 547); numericF5Speed.Size = new Size(90, 23); numericF5Speed.DecimalPlaces = 2; numericF5Speed.Increment = 0.05M; numericF5Speed.Minimum = 0.70M; numericF5Speed.Maximum = 1.20M; numericF5Speed.Value = 0.90M;
-            labelF5Hint.Location = new Point(16, 657); labelF5Hint.Size = new Size(711, 42); labelF5Hint.Text = "1.00 = original F5 speed. Lower = slower narration.\nTranscript must match the chosen excerpt exactly.";
+            labelF5Hint.Location = new Point(16, 657); labelF5Hint.Size = new Size(711, 42); labelF5Hint.Text = "1.00 = original F5 speed. Lower = slower narration.\nTranscript should match the reference audio.";
             buttonF5Setup.Location = new Point(16, 545); buttonF5Setup.Size = new Size(150, 32); buttonF5Setup.Text = "Install / Verify F5"; buttonF5Setup.Click += buttonF5Setup_Click;
             buttonF5.Location = new Point(177, 545); buttonF5.Size = new Size(210, 32); buttonF5.Text = "Generate with F5-TTS"; buttonF5.Click += buttonF5_Click;
             buttonChatterbox.Location = new Point(16, 459); buttonChatterbox.Name = "buttonChatterbox"; buttonChatterbox.Size = new Size(245, 34); buttonChatterbox.Anchor = AnchorStyles.Top | AnchorStyles.Left; buttonChatterbox.Text = "Generate with Chatterbox AI"; buttonChatterbox.Click += buttonChatterbox_Click;
@@ -78,7 +78,7 @@ namespace PersonalMemoirsReader
             Controls.Add(buttonOpenText); Controls.Add(buttonSaveText); Controls.Add(labelStatus); Controls.Add(buttonGenerate);
             Controls.Add(labelFfmpeg); Controls.Add(textFfmpeg); Controls.Add(buttonFfmpeg);
             Controls.Add(labelEngine); Controls.Add(comboVoices); Controls.Add(buttonStopSpeech);
-            Name = "MainForm"; StartPosition = FormStartPosition.CenterScreen; Text = "Personal Memoirs Reader v0.1.31";
+            Name = "MainForm"; StartPosition = FormStartPosition.CenterScreen; Text = "Personal Memoirs Reader v0.1.32";
             ResumeLayout(false); PerformLayout();
         }
         #endregion

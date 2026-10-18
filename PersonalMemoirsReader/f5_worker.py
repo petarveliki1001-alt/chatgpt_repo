@@ -8,7 +8,7 @@ os.environ["HF_HUB_OFFLINE"] = "1"
 os.environ["TRANSFORMERS_OFFLINE"] = "1"
 
 def prepare_wav(source, destination, full_transcript, start=0.0, end=None):
-    """Use an explicitly chosen excerpt; never guess transcript alignment."""
+    """Convert the full recording, or an optional user-selected range, to mono PCM."""
     import math
     import numpy as np
     import soundfile as sf
@@ -21,9 +21,8 @@ def prepare_wav(source, destination, full_transcript, start=0.0, end=None):
             end = duration
         if not math.isfinite(end) or end <= start or end > duration + 1 / sample_rate:
             raise ValueError(f"Choose a reference range within the {duration:.2f}s recording")
-        if not 1.0 <= end - start <= 11.0:
-            raise ValueError("Choose a 1–11 second reference excerpt and enter exactly its spoken words. "
-                             "Long recordings are never automatically cut or aligned by guessing.")
+        if int(end * sample_rate) <= int(start * sample_rate):
+            raise ValueError("Reference recording or selected range is empty")
         recording.seek(int(start * sample_rate))
         data = recording.read(frames=int(end * sample_rate) - int(start * sample_rate),
                               dtype="float32", always_2d=True)

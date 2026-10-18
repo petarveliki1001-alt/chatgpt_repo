@@ -141,7 +141,7 @@ public partial class MainForm
             Log("Exit code " + proc.ExitCode);
             if (proc.ExitCode != 0 || !File.Exists(output)) throw new InvalidOperationException("F5 generation failed. Open AI Log for details.");
             generatedPlayer?.Stop(); generatedPlayer?.Dispose(); generatedPlayer = new SoundPlayer(output); generatedPlayer.Load(); generatedPlayer.Play();
-            File.WriteAllText(output + ".txt", $"Engine: F5-TTS\nSpeed: {speed.ToString(System.Globalization.CultureInfo.InvariantCulture)}\nReference: {selectedFile}\nReference segment: explicit excerpt; see AI Log for exact boundaries\nReference transcript: {textReference.Text}\nText: {textMemoir.Text}\n");
+            File.WriteAllText(output + ".txt", $"Engine: F5-TTS\nSpeed: {speed.ToString(System.Globalization.CultureInfo.InvariantCulture)}\nReference: {selectedFile}\nReference input: full recording by default; optional user range; F5 may shorten it internally\nReference transcript: {textReference.Text}\nText: {textMemoir.Text}\n");
             labelStatus.Text = "F5 WAV saved and playing: " + output;
         }
         catch (Exception ex) { Log("FAILURE: " + ex); labelStatus.Text = "F5 failed. Open AI Log."; MessageBox.Show(this, ex.Message); }
