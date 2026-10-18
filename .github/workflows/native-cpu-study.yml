@@ -1,0 +1,76 @@
+name: Native CPU study from source
+on:
+  workflow_dispatch:
+  push:
+    branches: [native-runtime-verification]
+    paths:
+      - 'NativeSpeech.Benchmarks/**'
+      - 'experiments/**'
+      - 'CpuStudy.sln'
+      - 'verification/CPU-STUDY.md'
+      - 'tools/package-study.ps1'
+      - '.github/workflows/native-cpu-study.yml'
+permissions:
+  contents: write
+  actions: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      ORT_DISABLE_TELEMETRY: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Package source only and build the extracted delivery
+        shell: pwsh
+        run: |
+          tools/package-study.ps1
+          Expand-Archive downloads/CpuStudy_v1.zip -DestinationPath artifacts/study-extracted
+          dotnet build artifacts/study-extracted/CpuStudy_v1/CpuStudy.sln -c Release
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $results='verification/results/cpu-study/windows'
+          New-Item -ItemType Directory -Force $results | Out-Null
+          dotnet run --project artifacts/study-extracted/CpuStudy_v1/experiments/PocketProbe -c Release -- --native-info | Tee-Object "$results/pocket-native-info.txt"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/cache/restore@v4
+        id: models
+        with:
+          path: ${{ runner.temp }}/memoirs-models
+          key: native-desktop-models-${{ hashFiles('NativeSpeech/models.json') }}
+      - name: Require previously verified models without downloading additional weights
+        shell: pwsh
+        run: |
+          if ('${{ steps.models.outputs.cache-hit }}' -ne 'true') { throw 'Existing-model cache unavailable. No new model download will be attempted.' }
+      - name: Measure existing FP32 and locally derived quantized models
+        shell: pwsh
+        run: |
+          $source='artifacts/study-extracted/CpuStudy_v1'
+          $models=Join-Path $env:RUNNER_TEMP 'memoirs-models'
+          $results='verification/results/cpu-study/windows'
+          dotnet run --project "$source/NativeSpeech.Benchmarks" -c Release -- chatterbox $models "$models/reference.wav" "$results/fp32"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet run --project "$source/experiments/QuantizeOnnx" -c Release -- "$models/chatterbox/onnx/language_model.onnx" "$models/chatterbox/onnx/language_model.q8.onnx"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet run --project "$source/NativeSpeech.Benchmarks" -c Release -- chatterbox $models "$models/reference.wav" "$results/q8" --q8 --short-only
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Preserve source and diagnostics without executables
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: CPU-study-source-and-results
+          path: |
+            downloads/CpuStudy_v1.zip
+            verification/results/cpu-study/windows/
+      - name: Publish separate study results
+        shell: pwsh
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add downloads/CpuStudy_v1.zip verification/results/cpu-study/windows/pocket-native-info.txt verification/results/cpu-study/windows/fp32/report.json verification/results/cpu-study/windows/q8/report.json
+          git commit -m 'Record CPU study from rebuilt source; no desktop release [skip ci]'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git push origin HEAD:cpu-study-${{ github.run_id }}
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

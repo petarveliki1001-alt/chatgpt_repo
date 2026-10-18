@@ -1,0 +1,22 @@
+{
+  "mode": "f5",
+  "profile": true,
+  "allowSpinning": true,
+  "prepacking": true,
+  "languageModelOverride": null,
+  "decoderCache": null,
+  "decoderCacheBytes": 0,
+  "threads": 4,
+  "platform": "Debian GNU/Linux 13 (trixie)",
+  "runtime": "1.22.0",
+  "reference": "/workspace/scratch/f5-investigation/official_reference.wav",
+  "referenceHash": "B0E22048E72414FCC1E6B6342E47A774D748A195ED34E4A5B3FCF416707F2B71",
+  "rows": [
+    {
+      "loadSeconds": 1.8616541,
+      "seconds": 103.5039679,
+      "audioSeconds": 4.042666666666666
+    }
+  ],
+  "profileScopeNote": "Full synthesis wall timing only; operator breakdown is supplied separately in f5-operators.json."
+}

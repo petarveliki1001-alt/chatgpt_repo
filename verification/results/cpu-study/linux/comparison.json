@@ -1,0 +1,62 @@
+[
+  {
+    "variant": "cache-create",
+    "runtime": "1.22.0",
+    "coldLoadSeconds": 37.2083336,
+    "coldSynthesisSeconds": 11.5628633,
+    "warmSynthesisSeconds": 11.8047823,
+    "audioSeconds": 2.44,
+    "sameShortSpeechTokens": true,
+    "tokens": 60
+  },
+  {
+    "variant": "cache-reuse",
+    "runtime": "1.22.0",
+    "coldLoadSeconds": 34.3135674,
+    "coldSynthesisSeconds": 11.033253,
+    "warmSynthesisSeconds": 10.2237845,
+    "audioSeconds": 2.44,
+    "sameShortSpeechTokens": true,
+    "tokens": 60
+  },
+  {
+    "variant": "no-spinning",
+    "runtime": "1.22.0",
+    "coldLoadSeconds": 37.0625736,
+    "coldSynthesisSeconds": 11.8256723,
+    "warmSynthesisSeconds": 11.0835528,
+    "audioSeconds": 2.44,
+    "sameShortSpeechTokens": true,
+    "tokens": 60
+  },
+  {
+    "variant": "no-prepacking",
+    "runtime": "1.22.0",
+    "coldLoadSeconds": 31.4806896,
+    "coldSynthesisSeconds": 11.6184352,
+    "warmSynthesisSeconds": 9.4738623,
+    "audioSeconds": 2.44,
+    "sameShortSpeechTokens": true,
+    "tokens": 60
+  },
+  {
+    "variant": "q8-language",
+    "runtime": "1.22.0",
+    "coldLoadSeconds": 35.336609,
+    "coldSynthesisSeconds": 11.2793797,
+    "warmSynthesisSeconds": 9.0411316,
+    "audioSeconds": 2.52,
+    "sameShortSpeechTokens": false,
+    "tokens": 62
+  },
+  {
+    "variant": "ort-1.31",
+    "runtime": "1.31.0",
+    "coldLoadSeconds": 72.5506372,
+    "coldSynthesisSeconds": 12.0765994,
+    "warmSynthesisSeconds": 10.1189173,
+    "audioSeconds": 2.44,
+    "sameShortSpeechTokens": true,
+    "tokens": 60
+  }
+]

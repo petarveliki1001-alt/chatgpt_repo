@@ -1,0 +1,22 @@
+{
+  "reference": "/workspace/scratch/f5-investigation/official_reference.wav",
+  "method": "Chatterbox reference-speaker embeddings; diagnostic similarity only, not a listening-quality score",
+  "comparisons": [
+    {
+      "file": "/workspace/scratch/cpu-profile/chatterbox/cold-short.wav",
+      "cosine": 0.803114906740396
+    },
+    {
+      "file": "/workspace/scratch/cpu-profile/chatterbox/warm-short.wav",
+      "cosine": 0.7621693741143339
+    },
+    {
+      "file": "/workspace/scratch/cpu-profile/q8-language/cold-short.wav",
+      "cosine": 0.771370866264693
+    },
+    {
+      "file": "/workspace/scratch/cpu-profile/q8-language/warm-short.wav",
+      "cosine": 0.7857085583776482
+    }
+  ]
+}

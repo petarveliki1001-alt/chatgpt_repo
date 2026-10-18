@@ -1,0 +1,248 @@
+{
+  "mode": "f5-step",
+  "profile": true,
+  "allowSpinning": true,
+  "prepacking": true,
+  "languageModelOverride": null,
+  "decoderCache": null,
+  "decoderCacheBytes": 0,
+  "threads": 4,
+  "platform": "Debian GNU/Linux 13 (trixie)",
+  "runtime": "1.22.0",
+  "reference": "/workspace/scratch/f5-investigation/official_reference.wav",
+  "referenceHash": "B0E22048E72414FCC1E6B6342E47A774D748A195ED34E4A5B3FCF416707F2B71",
+  "rows": [
+    {
+      "scope": "Three identical first-step transformer calls with captured PCM/text/noise inputs; not full synthesis.",
+      "seconds": [
+        4.3910561,
+        2.8635228,
+        3.0962113
+      ]
+    }
+  ],
+  "summaries": [
+    {
+      "file": "f5-transformer-step_2026-10-18_21-37-08.json",
+      "ops": [
+        {
+          "operation": "MatMul",
+          "calls": 471,
+          "seconds": 7.02441
+        },
+        {
+          "operation": "FusedMatMul",
+          "calls": 66,
+          "seconds": 1.780905
+        },
+        {
+          "operation": "Mul",
+          "calls": 879,
+          "seconds": 0.320149
+        },
+        {
+          "operation": "Add",
+          "calls": 1083,
+          "seconds": 0.307154
+        },
+        {
+          "operation": "Softmax",
+          "calls": 66,
+          "seconds": 0.234686
+        },
+        {
+          "operation": "Conv",
+          "calls": 12,
+          "seconds": 0.186054
+        },
+        {
+          "operation": "Transpose",
+          "calls": 276,
+          "seconds": 0.145129
+        },
+        {
+          "operation": "LayerNormalization",
+          "calls": 132,
+          "seconds": 0.09672
+        },
+        {
+          "operation": "Gemm",
+          "calls": 69,
+          "seconds": 0.053379
+        },
+        {
+          "operation": "Concat",
+          "calls": 141,
+          "seconds": 0.0445
+        },
+        {
+          "operation": "Split",
+          "calls": 204,
+          "seconds": 0.04161
+        },
+        {
+          "operation": "Softplus",
+          "calls": 12,
+          "seconds": 0.039985
+        },
+        {
+          "operation": "Tanh",
+          "calls": 78,
+          "seconds": 0.023303
+        },
+        {
+          "operation": "Neg",
+          "calls": 132,
+          "seconds": 0.012258
+        },
+        {
+          "operation": "Reshape",
+          "calls": 666,
+          "seconds": 0.006
+        },
+        {
+          "operation": "SkipLayerNormalization",
+          "calls": 3,
+          "seconds": 0.001754
+        },
+        {
+          "operation": "Gather",
+          "calls": 6,
+          "seconds": 0.000141
+        },
+        {
+          "operation": "Sub",
+          "calls": 3,
+          "seconds": 0.000125
+        },
+        {
+          "operation": "QuickGelu",
+          "calls": 3,
+          "seconds": 0.000021
+        }
+      ],
+      "expensive": [
+        {
+          "node": "/f5_transformer/transformer_blocks.8/ff/ff/ff.2/MatMul/MatMulScaleFusion/_kernel_time",
+          "operation": "FusedMatMul",
+          "calls": 3,
+          "seconds": 0.118099
+        },
+        {
+          "node": "/f5_transformer/transformer_blocks.8/ff/ff/ff.0/ff.0.0/MatMul_kernel_time",
+          "operation": "MatMul",
+          "calls": 3,
+          "seconds": 0.114561
+        },
+        {
+          "node": "/f5_transformer/transformer_blocks.3/ff/ff/ff.0/ff.0.0/MatMul_kernel_time",
+          "operation": "MatMul",
+          "calls": 3,
+          "seconds": 0.114376
+        },
+        {
+          "node": "/f5_transformer/transformer_blocks.16/ff/ff/ff.0/ff.0.0/MatMul_kernel_time",
+          "operation": "MatMul",
+          "calls": 3,
+          "seconds": 0.106302
+        },
+        {
+          "node": "/f5_transformer/transformer_blocks.14/ff/ff/ff.2/MatMul/MatMulScaleFusion/_kernel_time",
+          "operation": "FusedMatMul",
+          "calls": 3,
+          "seconds": 0.098423
+        },
+        {
+          "node": "/f5_transformer/transformer_blocks.16/ff/ff/ff.2/MatMul/MatMulScaleFusion/_kernel_time",
+          "operation": "FusedMatMul",
+          "calls": 3,
+          "seconds": 0.095008
+        },
+        {
+          "node": "/f5_transformer/transformer_blocks.15/ff/ff/ff.0/ff.0.0/MatMul_kernel_time",
+          "operation": "MatMul",
+          "calls": 3,
+          "seconds": 0.092964
+        },
+        {
+          "node": "/f5_transformer/transformer_blocks.17/ff/ff/ff.0/ff.0.0/MatMul_kernel_time",
+          "operation": "MatMul",
+          "calls": 3,
+          "seconds": 0.092163
+        },
+        {
+          "node": "/f5_transformer/transformer_blocks.6/ff/ff/ff.0/ff.0.0/MatMul_kernel_time",
+          "operation": "MatMul",
+          "calls": 3,
+          "seconds": 0.09198
+        },
+        {
+          "node": "/f5_transformer/transformer_blocks.7/ff/ff/ff.0/ff.0.0/MatMul_kernel_time",
+          "operation": "MatMul",
+          "calls": 3,
+          "seconds": 0.091781
+        },
+        {
+          "node": "/f5_transformer/transformer_blocks.11/ff/ff/ff.0/ff.0.0/MatMul_kernel_time",
+          "operation": "MatMul",
+          "calls": 3,
+          "seconds": 0.089994
+        },
+        {
+          "node": "/f5_transformer/transformer_blocks.12/ff/ff/ff.0/ff.0.0/MatMul_kernel_time",
+          "operation": "MatMul",
+          "calls": 3,
+          "seconds": 0.089249
+        },
+        {
+          "node": "/f5_transformer/transformer_blocks.14/ff/ff/ff.0/ff.0.0/MatMul_kernel_time",
+          "operation": "MatMul",
+          "calls": 3,
+          "seconds": 0.089171
+        },
+        {
+          "node": "/f5_transformer/transformer_blocks.6/ff/ff/ff.2/MatMul/MatMulScaleFusion/_kernel_time",
+          "operation": "FusedMatMul",
+          "calls": 3,
+          "seconds": 0.089105
+        },
+        {
+          "node": "/f5_transformer/transformer_blocks.5/ff/ff/ff.0/ff.0.0/MatMul_kernel_time",
+          "operation": "MatMul",
+          "calls": 3,
+          "seconds": 0.088897
+        },
+        {
+          "node": "/f5_transformer/transformer_blocks.15/ff/ff/ff.2/MatMul/MatMulScaleFusion/_kernel_time",
+          "operation": "FusedMatMul",
+          "calls": 3,
+          "seconds": 0.088174
+        },
+        {
+          "node": "/f5_transformer/transformer_blocks.13/ff/ff/ff.0/ff.0.0/MatMul_kernel_time",
+          "operation": "MatMul",
+          "calls": 3,
+          "seconds": 0.088158
+        },
+        {
+          "node": "/f5_transformer/transformer_blocks.4/ff/ff/ff.0/ff.0.0/MatMul_kernel_time",
+          "operation": "MatMul",
+          "calls": 3,
+          "seconds": 0.087744
+        },
+        {
+          "node": "/f5_transformer/transformer_blocks.9/ff/ff/ff.2/MatMul/MatMulScaleFusion/_kernel_time",
+          "operation": "FusedMatMul",
+          "calls": 3,
+          "seconds": 0.087705
+        },
+        {
+          "node": "/f5_transformer/transformer_blocks.9/ff/ff/ff.0/ff.0.0/MatMul_kernel_time",
+          "operation": "MatMul",
+          "calls": 3,
+          "seconds": 0.086921
+        }
+      ]
+    }
+  ]
+}

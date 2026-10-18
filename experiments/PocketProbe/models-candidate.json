@@ -1,0 +1,51 @@
+[
+  {
+    "Path": "decoder.int8.onnx",
+    "Url": "https://huggingface.co/csukuangfj2/sherpa-onnx-pocket-tts-int8-2026-01-26/resolve/e715955cf50d18d919d37231513c0e914b83661a/decoder.int8.onnx?download=true",
+    "Size": 22693618,
+    "Sha256": "12b0857402d31aead94df19d6783b4350d1f740e811f3a3202c70ad89ae11eea",
+    "GitBlobSha1": null
+  },
+  {
+    "Path": "encoder.onnx",
+    "Url": "https://huggingface.co/csukuangfj2/sherpa-onnx-pocket-tts-int8-2026-01-26/resolve/e715955cf50d18d919d37231513c0e914b83661a/encoder.onnx?download=true",
+    "Size": 72713165,
+    "Sha256": "e8f2f6d301ffb96e398b138a7dc6d3038622d236044636b73d920bab85890260",
+    "GitBlobSha1": null
+  },
+  {
+    "Path": "lm_flow.int8.onnx",
+    "Url": "https://huggingface.co/csukuangfj2/sherpa-onnx-pocket-tts-int8-2026-01-26/resolve/e715955cf50d18d919d37231513c0e914b83661a/lm_flow.int8.onnx?download=true",
+    "Size": 9962530,
+    "Sha256": "8d627d235c44a597da908e1085ebe241cbbe358964c502c5a5063d18851a5529",
+    "GitBlobSha1": null
+  },
+  {
+    "Path": "lm_main.int8.onnx",
+    "Url": "https://huggingface.co/csukuangfj2/sherpa-onnx-pocket-tts-int8-2026-01-26/resolve/e715955cf50d18d919d37231513c0e914b83661a/lm_main.int8.onnx?download=true",
+    "Size": 76341079,
+    "Sha256": "bfc0c7e7e3d72864fa3bb2ee499f62f21ddc1474b885f5f3ca570f8be73e787e",
+    "GitBlobSha1": null
+  },
+  {
+    "Path": "text_conditioner.onnx",
+    "Url": "https://huggingface.co/csukuangfj2/sherpa-onnx-pocket-tts-int8-2026-01-26/resolve/e715955cf50d18d919d37231513c0e914b83661a/text_conditioner.onnx?download=true",
+    "Size": 16388343,
+    "Sha256": "0b84e837d7bfaf2c896627b03e3f080320309f37f4fc7df7698c644f7ba5e6b1",
+    "GitBlobSha1": null
+  },
+  {
+    "Path": "token_scores.json",
+    "Url": "https://huggingface.co/csukuangfj2/sherpa-onnx-pocket-tts-int8-2026-01-26/resolve/e715955cf50d18d919d37231513c0e914b83661a/token_scores.json?download=true",
+    "Size": 123616,
+    "Sha256": null,
+    "GitBlobSha1": "43763d2e426d343525695e935e622311c8e0193f"
+  },
+  {
+    "Path": "vocab.json",
+    "Url": "https://huggingface.co/csukuangfj2/sherpa-onnx-pocket-tts-int8-2026-01-26/resolve/e715955cf50d18d919d37231513c0e914b83661a/vocab.json?download=true",
+    "Size": 69478,
+    "Sha256": null,
+    "GitBlobSha1": "ce1f89e0a1f3319fa910551ac130da4ae4514b51"
+  }
+]
