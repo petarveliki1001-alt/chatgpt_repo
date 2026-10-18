@@ -27,8 +27,6 @@ def prepare_wav(source, destination, full_transcript, start=0.0, end=None):
         data = recording.read(frames=int(end * sample_rate) - int(start * sample_rate),
                               dtype="float32", always_2d=True)
     transcript = full_transcript.strip()
-    if not transcript:
-        raise ValueError("Enter the exact transcript of the chosen excerpt")
     mono = data.mean(axis=1)
     if not np.isfinite(mono).all():
         raise ValueError("Reference contains invalid audio samples")
@@ -58,6 +56,38 @@ def install_wav_compatibility():
     torchaudio.load = wav_load
     print("PCM WAV decoder: soundfile (TorchCodec/FFmpeg not required)", flush=True)
 
+def transcribe_reference(ref_audio, language=None):
+    """Transcribe F5's processed PCM audio, without an FFmpeg dependency."""
+    import numpy as np
+    import soundfile as sf
+    from scipy.signal import resample_poly
+    from math import gcd
+    from f5_tts.infer import utils_infer
+    if utils_infer.asr_pipe is None:
+        print("STAGE: Loading local automatic reference transcription model", flush=True)
+        try:
+            utils_infer.initialize_asr_pipeline(device="cpu")
+        except OSError as exc:
+            raise RuntimeError("Automatic reference transcription model is unavailable locally. "
+                               "Run Install / Verify F5 once with internet access, or enter a reference transcript.") from exc
+    audio, rate = sf.read(str(ref_audio), dtype="float32", always_2d=True)
+    audio = audio.mean(axis=1)
+    if rate != 16000:
+        divisor = gcd(rate, 16000)
+        audio = resample_poly(audio, 16000 // divisor, rate // divisor).astype(np.float32)
+    options = {"task": "transcribe"}
+    if language:
+        options["language"] = language
+    result = utils_infer.asr_pipe({"raw": audio, "sampling_rate": 16000},
+                                 chunk_length_s=30, batch_size=1,
+                                 generate_kwargs=options, return_timestamps=False)
+    transcript = result["text"].strip()
+    if not transcript:
+        raise ValueError("Automatic transcription found no words in the reference audio")
+    print(f"AUTOMATIC REFERENCE TRANSCRIPT: {transcript}", flush=True)
+    return transcript
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--reference", required=True)
@@ -82,9 +112,11 @@ def main():
     target_text = Path(a.text_file).read_text(encoding="utf-8-sig").strip()
     ref_tokens = normalized_words(reference_text)
     target_tokens = normalized_words(target_text)
-    if not ref_tokens or not target_tokens:
-        raise ValueError("Reference transcript and narration text must not be empty")
-    if ref_tokens == target_tokens:
+    if not target_tokens and not a.prepare_only:
+        raise ValueError("Narration text must not be empty")
+    if not ref_tokens:
+        print("Reference transcript: automatic (F5 will transcribe its processed reference audio)", flush=True)
+    if ref_tokens and ref_tokens == target_tokens:
         print("INFO: reference and narration text match; generation permitted", flush=True)
     print("Reference transcript: %d words; narration: %d words" % (len(ref_tokens), len(target_tokens)), flush=True)
     import soundfile as sf
@@ -96,6 +128,9 @@ def main():
         aligned_reference_text = prepare_wav(a.reference, reference, reference_text, a.reference_start, a.reference_end)
         install_wav_compatibility()
         from f5_tts.api import F5TTS
+        if not aligned_reference_text:
+            from f5_tts.infer import utils_infer
+            utils_infer.transcribe = transcribe_reference
         print("Loading F5-TTS pretrained model", flush=True)
         model = F5TTS(device="cpu")
         print(f"FRESH F5 PROCESS; speed={a.speed:.2f}; nfe_step={a.nfe_step}; cfg_strength={a.cfg_strength:.2f}", flush=True)

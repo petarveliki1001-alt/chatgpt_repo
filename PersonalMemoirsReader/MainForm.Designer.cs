@@ -52,12 +52,12 @@ namespace PersonalMemoirsReader
                 "Original baseline (exag 0.5 / CFG 0.5)"
             }); comboQuality.SelectedIndex = 0;
             buttonHistory.Location = new Point(551, 459); buttonHistory.Size = new Size(176, 34); buttonHistory.Text = "Compare WAV Files"; buttonHistory.Click += buttonHistory_Click;
-            labelReferenceText.Location = new Point(16, 512); labelReferenceText.AutoSize = true; labelReferenceText.Text = "Reference transcript (F5):";
+            labelReferenceText.Location = new Point(16, 512); labelReferenceText.AutoSize = true; labelReferenceText.Text = "Transcript (optional):";
             textReference.Location = new Point(190, 509); textReference.Size = new Size(537, 23); textReference.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textReference.PlaceholderText = "Exact words spoken in the reference excerpt";
+            textReference.PlaceholderText = "Leave blank for automatic transcription";
             labelF5Speed.Location = new Point(404, 551); labelF5Speed.AutoSize = true; labelF5Speed.Text = "F5 speaking speed:";
             numericF5Speed.Location = new Point(538, 547); numericF5Speed.Size = new Size(90, 23); numericF5Speed.DecimalPlaces = 2; numericF5Speed.Increment = 0.05M; numericF5Speed.Minimum = 0.70M; numericF5Speed.Maximum = 1.20M; numericF5Speed.Value = 0.90M;
-            labelF5Hint.Location = new Point(16, 657); labelF5Hint.Size = new Size(711, 42); labelF5Hint.Text = "1.00 = original F5 speed. Lower = slower narration.\nTranscript should match the reference audio.";
+            labelF5Hint.Location = new Point(16, 657); labelF5Hint.Size = new Size(711, 42); labelF5Hint.Text = "1.00 = original F5 speed. Lower = slower narration.\nBlank transcript = automatic. Enter text only to override it.";
             buttonF5Setup.Location = new Point(16, 545); buttonF5Setup.Size = new Size(150, 32); buttonF5Setup.Text = "Install / Verify F5"; buttonF5Setup.Click += buttonF5Setup_Click;
             buttonF5.Location = new Point(177, 545); buttonF5.Size = new Size(210, 32); buttonF5.Text = "Generate with F5-TTS"; buttonF5.Click += buttonF5_Click;
             buttonChatterbox.Location = new Point(16, 459); buttonChatterbox.Name = "buttonChatterbox"; buttonChatterbox.Size = new Size(245, 34); buttonChatterbox.Anchor = AnchorStyles.Top | AnchorStyles.Left; buttonChatterbox.Text = "Generate with Chatterbox AI"; buttonChatterbox.Click += buttonChatterbox_Click;
@@ -78,7 +78,7 @@ namespace PersonalMemoirsReader
             Controls.Add(buttonOpenText); Controls.Add(buttonSaveText); Controls.Add(labelStatus); Controls.Add(buttonGenerate);
             Controls.Add(labelFfmpeg); Controls.Add(textFfmpeg); Controls.Add(buttonFfmpeg);
             Controls.Add(labelEngine); Controls.Add(comboVoices); Controls.Add(buttonStopSpeech);
-            Name = "MainForm"; StartPosition = FormStartPosition.CenterScreen; Text = "Personal Memoirs Reader v0.1.32";
+            Name = "MainForm"; StartPosition = FormStartPosition.CenterScreen; Text = "Personal Memoirs Reader v0.1.33";
             ResumeLayout(false); PerformLayout();
         }
         #endregion

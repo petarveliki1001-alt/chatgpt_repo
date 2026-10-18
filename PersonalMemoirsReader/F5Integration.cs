@@ -28,7 +28,7 @@ public partial class MainForm
         if (generating) return;
         if (MessageBox.Show(this,
             "F5-TTS requires its own Python packages and pretrained model weights.\n\n" +
-            "The application will create a SEPARATE environment, install F5-TTS, download its pretrained model, and test loading it offline.\n" +
+            "The application will create a SEPARATE environment, install F5-TTS, download its speech and automatic-transcription models, and test loading them offline.\n" +
             "This may take considerable time and disk space; internet is required for setup only.\n" +
             "Your existing Chatterbox installation will not be modified.\n\nContinue?",
             "F5-TTS installation and verification", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
@@ -86,7 +86,7 @@ public partial class MainForm
             if (!File.Exists(F5ReadyMarker)) throw new InvalidOperationException("Offline model verification did not complete.");
             Log("READY: F5-TTS installation and offline model verification succeeded.");
             labelStatus.Text = "F5-TTS ready: pretrained model verified offline.";
-            MessageBox.Show(this, "F5-TTS is ready for offline generation. Choose a recording and enter its exact spoken transcript.", "F5-TTS ready");
+            MessageBox.Show(this, "F5-TTS is ready for offline generation. Choose a recording and enter narration text. Leave the reference transcript blank for automatic transcription.", "F5-TTS ready");
         }
         catch (Exception ex)
         {
@@ -108,7 +108,7 @@ public partial class MainForm
         if (generating) return;
         if (!File.Exists(F5Python) || !File.Exists(F5ReadyMarker)) { MessageBox.Show(this, "F5-TTS is not ready. Click Install / Verify F5 to install its model and check offline operation."); return; }
         if (selectedFile == null || !File.Exists(selectedFile)) { MessageBox.Show(this, "Select a voice reference recording."); return; }
-        if (string.IsNullOrWhiteSpace(textReference.Text) || string.IsNullOrWhiteSpace(textMemoir.Text)) { MessageBox.Show(this, "Enter the reference transcript and narration text."); return; }
+        if (string.IsNullOrWhiteSpace(textMemoir.Text)) { MessageBox.Show(this, "Enter narration text."); return; }
         // Identical reference and target words are valid for controlled voice tests.
         // Do not block synthesis based on transcript overlap.
         var speed = numericF5Speed.Value;
@@ -139,7 +139,11 @@ public partial class MainForm
             proc.BeginOutputReadLine(); proc.BeginErrorReadLine();
             await proc.WaitForExitAsync(); proc.WaitForExit();
             Log("Exit code " + proc.ExitCode);
-            if (proc.ExitCode != 0 || !File.Exists(output)) throw new InvalidOperationException("F5 generation failed. Open AI Log for details.");
+            if (proc.ExitCode != 0 || !File.Exists(output))
+            {
+                string? reason = lines.LastOrDefault(x => x.Contains("RuntimeError:") || x.Contains("ValueError:"));
+                throw new InvalidOperationException(reason ?? "F5 generation failed. Open AI Log for details.");
+            }
             generatedPlayer?.Stop(); generatedPlayer?.Dispose(); generatedPlayer = new SoundPlayer(output); generatedPlayer.Load(); generatedPlayer.Play();
             File.WriteAllText(output + ".txt", $"Engine: F5-TTS\nSpeed: {speed.ToString(System.Globalization.CultureInfo.InvariantCulture)}\nReference: {selectedFile}\nReference input: full recording by default; optional user range; F5 may shorten it internally\nReference transcript: {textReference.Text}\nText: {textMemoir.Text}\n");
             labelStatus.Text = "F5 WAV saved and playing: " + output;

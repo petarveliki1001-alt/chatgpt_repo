@@ -62,9 +62,9 @@ class ReferenceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "silent"):
             worker.prepare_wav(self.source, self.output, "Words.")
 
-    def test_empty_transcript_is_rejected(self):
-        with self.assertRaisesRegex(ValueError, "exact transcript"):
-            worker.prepare_wav(self.source, self.output, " ", 0, 3)
+    def test_empty_transcript_is_preserved_for_automatic_transcription(self):
+        self.assertEqual(worker.prepare_wav(self.source, self.output, " ", 0, 3), "")
+        self.assertEqual(sf.info(self.output).frames, 3 * self.rate)
 
     def test_preview_command_works_without_torch_or_models(self):
         transcript = self.root / "transcript.txt"
@@ -105,6 +105,54 @@ class ReferenceTests(unittest.TestCase):
         self.assertEqual(args["ref_text"], "These are the exact reference words.")
         self.assertEqual(args["gen_text"], "This is a different narration.")
         self.assertEqual(args["nfe_step"], 32)
+
+    def test_blank_transcript_reaches_f5_and_enables_automatic_transcription(self):
+        reference_text = self.root / "reference.txt"
+        reference_text.write_text("", encoding="utf-8")
+        target = self.root / "target.txt"
+        target.write_text("Narration only.", encoding="utf-8")
+        calls = []
+        class FakeF5:
+            def __init__(self, **kwargs):
+                pass
+            def infer(self, **kwargs):
+                calls.append(kwargs)
+                sf.write(kwargs["file_wave"], np.ones(24000)*.1, 24000)
+        api = types.ModuleType("f5_tts.api")
+        api.F5TTS = FakeF5
+        infer = types.ModuleType("f5_tts.infer")
+        infer.utils_infer = types.SimpleNamespace(transcribe=None)
+        argv = [str(WORKER), "--reference", str(self.source), "--reference-text", str(reference_text),
+                "--text-file", str(target), "--output", str(self.output)]
+        with patch.dict(sys.modules, {"f5_tts.api": api, "f5_tts.infer": infer}), \
+                patch.object(sys, "argv", argv), patch.object(worker, "install_wav_compatibility"):
+            worker.main()
+        self.assertEqual(calls[0]["ref_text"], "")
+        self.assertIs(infer.utils_infer.transcribe, worker.transcribe_reference)
+
+    def test_automatic_transcription_uses_audio_array_without_ffmpeg(self):
+        calls = []
+        def pipeline(audio, **kwargs):
+            calls.append((audio, kwargs))
+            return {"text": " Recognized words. "}
+        infer = types.ModuleType("f5_tts.infer")
+        infer.utils_infer = types.SimpleNamespace(asr_pipe=pipeline)
+        with patch.dict(sys.modules, {"f5_tts.infer": infer}):
+            self.assertEqual(worker.transcribe_reference(self.source), "Recognized words.")
+        audio, options = calls[0]
+        self.assertEqual(audio["sampling_rate"], 16000)
+        self.assertEqual(len(audio["raw"]), 15 * 16000)
+        self.assertEqual(audio["raw"].ndim, 1)
+        self.assertEqual(options["batch_size"], 1)
+
+    def test_missing_local_transcription_model_has_actionable_error(self):
+        def unavailable(**kwargs):
+            raise OSError("not cached")
+        infer = types.ModuleType("f5_tts.infer")
+        infer.utils_infer = types.SimpleNamespace(asr_pipe=None, initialize_asr_pipeline=unavailable)
+        with patch.dict(sys.modules, {"f5_tts.infer": infer}), \
+                self.assertRaisesRegex(RuntimeError, "Install / Verify F5"):
+            worker.transcribe_reference(self.source)
 
 
 if __name__ == "__main__":

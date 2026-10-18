@@ -37,9 +37,9 @@ public partial class MainForm
     private async void PreviewReference_Click(object? sender, EventArgs e)
     {
         if (generating) return;
-        if (selectedFile == null || !File.Exists(F5Python) || string.IsNullOrWhiteSpace(textReference.Text))
+        if (selectedFile == null || !File.Exists(F5Python))
         {
-            MessageBox.Show(this, "Install F5, select a recording, and enter the excerpt's exact transcript first.");
+            MessageBox.Show(this, "Install F5 and select a reference recording first.");
             return;
         }
         string transcript = Path.GetTempFileName();
@@ -65,7 +65,7 @@ public partial class MainForm
             samplePlayer = new SoundPlayer(output);
             samplePlayer.Load(); samplePlayer.Play();
             buttonStopListen.Enabled = true;
-            labelStatus.Text = "Listening to the exact F5 excerpt. Check every word against the transcript.";
+            labelStatus.Text = "Listening to the exact F5 excerpt. A blank transcript will be filled automatically during generation.";
         }
         catch (Exception ex) { MessageBox.Show(this, ex.Message, "F5 reference"); }
         finally
