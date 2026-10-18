@@ -1,0 +1,11 @@
+{
+  "engine": "Chatterbox ONNX FP32, C#",
+  "reference": "D:\\a\\_temp\\native-models/fixtures/reference-en.wav",
+  "text": "The small boat crossed the quiet lake.",
+  "tokens": 60,
+  "loadSeconds": 70.422798,
+  "inferenceSeconds": 16.6606765,
+  "durationSeconds": 2.44,
+  "rms": 0.17221743393073602,
+  "peak": 1.0895075
+}

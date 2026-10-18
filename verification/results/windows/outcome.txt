@@ -1,0 +1,1 @@
+PASS: both native C# pipelines generated WAVs matching the expected narration under ASR.

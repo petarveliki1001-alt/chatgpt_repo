@@ -1,0 +1,26 @@
+Native ONNX Runtime: 1.22.0
+Providers: AzureExecutionProvider, CPUExecutionProvider
+Loading Chatterbox speech_encoder
+Loading Chatterbox embed_tokens
+Loading Chatterbox language_model
+Loading Chatterbox conditional_decoder
+Text token IDs: 6563,255,296,62,2,32,26,108,2,165,48,2,16,89,32,32,49,2,42,2,194,236,33,2,25,245,9,0,6561,6561
+Chatterbox token 1: 1735, elapsed 1.27s
+Chatterbox token 11: 5029, elapsed 2.13s
+Chatterbox token 21: 1707, elapsed 2.82s
+Chatterbox token 31: 4752, elapsed 3.48s
+Chatterbox token 41: 1457, elapsed 4.10s
+Chatterbox token 51: 2216, elapsed 4.71s
+Chatterbox token 61: 6562, elapsed 5.45s
+Decoding 60 generated speech tokens
+{
+  "engine": "Chatterbox ONNX FP32, C#",
+  "reference": "D:\\a\\_temp\\native-models/fixtures/reference-en.wav",
+  "text": "The small boat crossed the quiet lake.",
+  "tokens": 60,
+  "loadSeconds": 70.422798,
+  "inferenceSeconds": 16.6606765,
+  "durationSeconds": 2.44,
+  "rms": 0.17221743393073602,
+  "peak": 1.0895075
+}

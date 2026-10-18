@@ -1,0 +1,7 @@
+{
+  "audio": "verification/results/windows/chatterbox.wav",
+  "text": "The small boat crossed the quiet lake.",
+  "expected": "The small boat crossed the quiet lake.",
+  "matches": true,
+  "seconds": 34.0673384
+}

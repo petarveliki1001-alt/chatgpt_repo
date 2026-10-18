@@ -1,0 +1,4 @@
+Native ONNX Runtime: 1.22.0
+Providers: AzureExecutionProvider, CPUExecutionProvider
+NATIVE TRANSCRIPT (34.05s): The small boat crossed the quiet lake.
+NATIVE TRANSCRIPT (34.94s): The small boat crossed the quiet lake.

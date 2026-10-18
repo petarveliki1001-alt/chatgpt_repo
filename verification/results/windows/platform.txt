@@ -1,0 +1,2 @@
+OS: Microsoft Windows 10.0.26100
+CPU: 4

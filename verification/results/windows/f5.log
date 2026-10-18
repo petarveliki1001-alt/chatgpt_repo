@@ -1,0 +1,19 @@
+Native ONNX Runtime: 1.22.0
+Providers: AzureExecutionProvider, CPUExecutionProvider
+NATIVE TRANSCRIPT (33.99s): Some call me nature. Others call me Mother Nature.
+F5 native step 8/31, elapsed 43.29s
+F5 native step 16/31, elapsed 100.18s
+F5 native step 24/31, elapsed 153.73s
+F5 native step 31/31, elapsed 191.39s
+{
+  "engine": "F5 ONNX FP32, C#",
+  "reference": "D:\\a\\_temp\\native-models/fixtures/reference-en.wav",
+  "referenceText": "Some call me nature. Others call me Mother Nature.",
+  "narration": "The small boat crossed the quiet lake.",
+  "steps": 31,
+  "loadSeconds": 1.7776269,
+  "inferenceSeconds": 191.5268342,
+  "durationSeconds": 4.042666666666666,
+  "rms": 0.14995893258639809,
+  "peak": 1
+}
