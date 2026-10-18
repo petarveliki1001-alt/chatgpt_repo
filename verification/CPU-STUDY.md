@@ -60,3 +60,13 @@ References: [PocketTTS design](https://github.com/kyutai-labs/pocket-tts), [nati
 ### Supplemental quantizer check
 
 `experiments/QuantizationCheck` independently constructs a small FP32 MatMul graph, converts it with the same executable source, and compares native FP32 and integer graph outputs for mixed signed inputs, zero activations, constant activations, different per-column scales and an all-zero weight column. Observed maximum absolute errors were 0.00650, 0, and 0.00476 (tolerance 0.05). The original graph hash stayed unchanged. This checks the conversion arithmetic, not speech intelligibility. This supplemental check was added after the initial Windows study source snapshot; the frozen `CpuStudy_v1.zip` does not include it. Its source and result are available on the performance-investigation branch.
+
+## Windows verification from the frozen source-only archive
+
+[Run 39169602916](https://github.com/petarveliki1001-alt/chatgpt_repo/actions/runs/39169602916) passed on Windows kernel 10.0.26100. The workflow first created `CpuStudy_v1.zip`, extracted it, and built that extracted source before measuring. The archive contains 44 source/documentation files and no executables, DLLs, model weights, or Python. The separately added supplemental numeric check is not part of that frozen snapshot.
+
+Original Chatterbox loading took 101.60 s; repeated generation took 15.70 s for 2.44 s of audio. The three-section warm narration generated 15.52 s in 80.83 s without reloading the model or preparing the reference again. The locally quantized language model generated 2.52 s in 11.83 s on its repeated request. Its language stage fell from 6.06 s to 2.06 s, while decoding remained about 9.6–9.7 s. Total repeated-request synthesis decreased about 25% in these samples, with a changed acoustic sequence (62 tokens versus 60). Wording and naturalness remain unverified. No approximate graph is enabled in the app.
+
+The candidate PocketProbe also loaded its native sherpa-onnx 1.13.8 library on Windows without any model files. This verifies native-library availability, not PocketTTS synthesis, speed, or voice quality. Its 198 MB model download still awaits agreement.
+
+The tested source archive and Windows results are on branch `cpu-study-39169602916`; the performance-investigation branch also contains the supplemental numerical check and this consolidated report. A diff against the v0.1.36 delivery commit confirms that `PersonalMemoirsReader`, `NativeSpeech`, and `MemoirsReader.sln` remain unchanged. This study is not a new desktop release or a claim that the performance requirement has been met.
