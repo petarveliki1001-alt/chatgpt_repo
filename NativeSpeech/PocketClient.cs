@@ -62,7 +62,7 @@ public sealed class PocketClient : IDisposable
         string executable=Path.Combine(folder,OperatingSystem.IsWindows()?"PocketWorker.exe":"PocketWorker");
         if(!File.Exists(executable)) throw new FileNotFoundException("Build MemoirsReader.sln to create the PocketTTS worker.",executable);
         var start=new ProcessStartInfo(executable){UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true};
-        start.StandardInputEncoding=Encoding.UTF8; start.StandardOutputEncoding=Encoding.UTF8;
+        start.StandardInputEncoding=new UTF8Encoding(false); start.StandardOutputEncoding=new UTF8Encoding(false);
         start.ArgumentList.Add(models); start.ArgumentList.Add(threads.ToString());
         start.Environment["ORT_DISABLE_TELEMETRY"]="1";
         lock(errors) errors.Clear();

@@ -6,7 +6,7 @@ using System.Text.Json;
 // A separate native process keeps sherpa's runtime apart from the older engines' runtime.
 // Stdout is a line-delimited JSON protocol. Native diagnostics remain on stderr.
 if (args.Length != 2) throw new ArgumentException("Expected model directory and CPU thread count.");
-Console.InputEncoding=System.Text.Encoding.UTF8; Console.OutputEncoding=new System.Text.UTF8Encoding(false);
+Console.InputEncoding=new System.Text.UTF8Encoding(false); Console.OutputEncoding=new System.Text.UTF8Encoding(false);
 string root=Path.GetFullPath(args[0]);
 int threads=Math.Clamp(int.Parse(args[1]),1,2);
 OfflineTts? tts=null;
@@ -20,7 +20,7 @@ try
         string? partial=null;
         try
         {
-            var request=JsonSerializer.Deserialize<NarrationRequest>(line) ?? throw new InvalidDataException("Missing request.");
+            var request=JsonSerializer.Deserialize<NarrationRequest>(line.TrimStart('\uFEFF')) ?? throw new InvalidDataException("Missing request.");
             if (request.Engine!="pocket" || string.IsNullOrWhiteSpace(request.Text)) throw new ArgumentException("Invalid narration request.");
             if (File.Exists(request.Output)) throw new IOException("Output already exists.");
             bool reusedModel=tts!=null;
